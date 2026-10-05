@@ -10,7 +10,7 @@ SITE = "https://codeonelabs.github.io"
 EMAIL = "codeone.unity@gmail.com"
 MAIL = f'<a href="mailto:{EMAIL}">{EMAIL}</a>'
 # Bump when style.css changes so browsers drop the cached copy.
-CSS_VERSION = "20261005b"
+CSS_VERSION = "20261005c"
 ROOT = Path(__file__).resolve().parent.parent
 
 LINKS = {
