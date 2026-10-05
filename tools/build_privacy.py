@@ -102,7 +102,7 @@ TEXT["en"] = dict(
 <h2>7. Your rights and choices</h2>
 <p>You can ask us to access, correct, delete or export your information, to unlink an external account from your game data, or to restrict or object to processing. Send requests to {MAIL}. To help us find your records, include your in-game nickname, the platform you play on and the type of any linked account. We may ask for more information to confirm the request comes from you. Never send passwords, verification codes or access tokens.</p>
 <p>We reply without undue delay and within the time required by applicable law (for example, one month under the GDPR, or 10 days under Korea's Personal Information Protection Act).</p>
-<p><strong>Deleting your account in the game.</strong> On the title screen, open Options, then Account, then Delete Account, and press the button a second time to confirm. This deletes your play records in EOS cloud storage, the records, achievements, collection and nickname saved on the device, the game account created for the device, and the account links remembered on the device. The game then starts again as a new player. It cannot be undone. If you linked an Epic, Discord or Apple account, the provider may still hold a record that the account was once connected to this game; no game data remains attached to it, and you can ask us by email to have it removed.</p>
+<p><strong>Deleting your account in the game.</strong> On the title screen, open Options, then Account, then Delete Account, and press the button a second time to confirm. This deletes your play records in EOS cloud storage, the records, achievements, collection and nickname saved on the device, the game account created for the device, and the account links remembered on the device. The game then starts again as a new player. It cannot be undone. No email or separate request is needed. If you linked an Epic, Discord or Apple account, you can also remove the game from that account's own settings, as described below.</p>
 <p>You can also revoke the game's access in your Epic Games, Discord or Apple account settings. Revoking access there and deleting the game's saved data are separate steps. For voice chat, you can use push-to-talk in Options or deny microphone access in your device settings.</p>
 
 <h2>8. International users</h2>
@@ -207,7 +207,7 @@ TEXT["ko"] = dict(
 <h2>7. 이용자의 권리와 선택</h2>
 <p>이용자는 자신의 정보에 대한 열람, 정정, 삭제, 이동(내보내기), 외부 계정 연결 해제, 처리 정지 및 처리 반대를 요청할 수 있습니다. 요청은 {MAIL}로 보내 주세요. 기록을 찾을 수 있도록 게임 닉네임, 플레이하는 플랫폼, 연결한 계정 종류를 함께 적어 주시면 됩니다. 본인 확인을 위해 추가 정보를 요청할 수 있습니다. 비밀번호, 인증 코드, 접근 토큰은 절대 보내지 마세요.</p>
 <p>회사는 지체 없이, 관계 법령이 정한 기간 안에 답변합니다(예: 개인정보 보호법상 10일, GDPR상 1개월).</p>
-<p><strong>게임 안에서 계정 삭제.</strong> 타이틀 화면에서 옵션, 계정, 계정 삭제 순서로 들어가 버튼을 한 번 더 눌러 확인하면 계정이 삭제됩니다. EOS 클라우드 저장소의 플레이 기록, 기기에 저장된 기록·업적·도감·닉네임, 기기에 만들어진 게임 계정, 기기에 기억된 계정 연결 정보가 삭제되고 게임은 새 이용자로 다시 시작합니다. 삭제는 되돌릴 수 없습니다. Epic, Discord 또는 Apple 계정을 연결했다면 해당 업체에 이 게임과 연결된 적이 있다는 기록이 남을 수 있습니다. 그 기록에 연결된 게임 데이터는 남지 않으며, 이메일로 요청하면 이 기록의 삭제를 처리합니다.</p>
+<p><strong>게임 안에서 계정 삭제.</strong> 타이틀 화면에서 옵션, 계정, 계정 삭제 순서로 들어가 버튼을 한 번 더 눌러 확인하면 계정이 삭제됩니다. EOS 클라우드 저장소의 플레이 기록, 기기에 저장된 기록·업적·도감·닉네임, 기기에 만들어진 게임 계정, 기기에 기억된 계정 연결 정보가 삭제되고 게임은 새 이용자로 다시 시작합니다. 삭제는 되돌릴 수 없습니다. 이메일이나 별도 요청은 필요하지 않습니다. Epic, Discord 또는 Apple 계정을 연결했다면 아래 안내대로 해당 계정의 설정에서도 이 게임을 제거할 수 있습니다.</p>
 <p>Epic Games, Discord, Apple 계정 설정에서도 게임의 접근 권한을 철회할 수 있습니다. 외부 서비스의 권한 철회와 게임 저장 데이터 삭제는 서로 다른 절차입니다. 음성 채팅은 옵션에서 누르는 동안만 말하기로 바꾸거나, 기기 설정에서 마이크 권한을 거부할 수 있습니다.</p>
 
 <h2>8. 해외 이용자 안내</h2>
@@ -312,7 +312,7 @@ TEXT["ja"] = dict(
 <h2>7. お客様の権利と選択</h2>
 <p>お客様は、ご自身の情報の開示、訂正、削除、エクスポート、外部アカウント連携の解除、処理の制限や処理への異議を当社に求めることができます。ご依頼は{MAIL}までお送りください。記録を探せるよう、ゲーム内ニックネーム、プレイしているプラットフォーム、連携しているアカウントの種類をお書き添えください。ご本人確認のため追加の情報をお願いすることがあります。パスワード、認証コード、アクセストークンは絶対に送らないでください。</p>
 <p>当社は遅滞なく、適用される法令が定める期間内（例：GDPRでは1か月、韓国の個人情報保護法では10日）に回答します。</p>
-<p><strong>ゲーム内でのアカウント削除。</strong>タイトル画面でオプション、アカウント、アカウント削除の順に開き、ボタンをもう一度押して確認すると、アカウントが削除されます。EOSクラウドストレージのプレイ記録、端末に保存された記録・実績・図鑑・ニックネーム、端末用に作成されたゲームアカウント、端末に記憶された連携情報が削除され、ゲームは新しいプレイヤーとして始まります。削除は元に戻せません。Epic、DiscordまたはAppleのアカウントを連携していた場合、各事業者にこのゲームと連携していたという記録が残ることがあります。その記録にゲームデータは残らず、メールでご依頼いただければこの記録の削除に対応します。</p>
+<p><strong>ゲーム内でのアカウント削除。</strong>タイトル画面でオプション、アカウント、アカウント削除の順に開き、ボタンをもう一度押して確認すると、アカウントが削除されます。EOSクラウドストレージのプレイ記録、端末に保存された記録・実績・図鑑・ニックネーム、端末用に作成されたゲームアカウント、端末に記憶された連携情報が削除され、ゲームは新しいプレイヤーとして始まります。削除は元に戻せません。メールや別途のご依頼は必要ありません。Epic、DiscordまたはAppleのアカウントを連携していた場合は、以下のとおり各アカウントの設定からもこのゲームを削除できます。</p>
 <p>Epic Games、Discord、Appleのアカウント設定からも、ゲームのアクセス権限を取り消せます。外部サービスでの権限の取り消しと、ゲームの保存データの削除は別の手続きです。ボイスチャットは、オプションでプッシュトゥトークに切り替えるか、端末の設定でマイクへのアクセスを拒否できます。</p>
 
 <h2>8. 海外のお客様へ</h2>
@@ -417,7 +417,7 @@ TEXT["zh-Hans"] = dict(
 <h2>7. 您的权利与选择</h2>
 <p>您可以要求我们查阅、更正、删除或导出您的信息，解除外部账户与游戏数据的关联，或限制处理、反对处理。请将请求发送至 {MAIL}。为便于查找您的记录，请写明游戏内昵称、游玩的平台以及已关联账户的类型。我们可能会要求提供更多信息以确认请求来自您本人。请勿发送密码、验证码或访问令牌。</p>
 <p>我们会在不无故拖延的情况下，于适用法律规定的期限内答复（例如 GDPR 规定的一个月，或韩国《个人信息保护法》规定的 10 天）。</p>
-<p><strong>在游戏内删除账户。</strong>在标题画面依次打开选项、账户、删除账户，并再按一次按钮确认，即可删除账户。此操作会删除 EOS 云存储中的游戏记录、设备上保存的记录、成就、图鉴和昵称、为该设备创建的游戏账户，以及设备上记住的账户关联信息，之后游戏会以新玩家身份重新开始。删除后无法恢复。如果您关联过 Epic、Discord 或 Apple 账户，相应服务商处可能仍留有该账户曾与本游戏关联的记录；该记录不再关联任何游戏数据，您可以通过电子邮件要求我们删除。</p>
+<p><strong>在游戏内删除账户。</strong>在标题画面依次打开选项、账户、删除账户，并再按一次按钮确认，即可删除账户。此操作会删除 EOS 云存储中的游戏记录、设备上保存的记录、成就、图鉴和昵称、为该设备创建的游戏账户，以及设备上记住的账户关联信息，之后游戏会以新玩家身份重新开始。删除后无法恢复。无需发送电子邮件或另行申请。如果您关联过 Epic、Discord 或 Apple 账户，还可以按下文说明在该账户自己的设置中移除本游戏。</p>
 <p>您也可以在 Epic Games、Discord 或 Apple 的账户设置中撤销游戏的访问权限。在外部服务撤销权限与删除游戏保存的数据是两个独立的步骤。对于语音聊天，您可以在选项中改为按键通话，或在设备设置中拒绝麦克风权限。</p>
 
 <h2>8. 海外用户须知</h2>
@@ -522,7 +522,7 @@ TEXT["fr"] = dict(
 <h2>7. Vos droits et vos choix</h2>
 <p>Vous pouvez nous demander d'accéder à vos informations, de les rectifier, de les supprimer ou de les exporter, de délier un compte externe de vos données de jeu, ou de limiter le traitement ou de vous y opposer. Envoyez votre demande à {MAIL}. Pour nous aider à retrouver vos données, indiquez votre pseudo, la plateforme sur laquelle vous jouez et le type de compte lié, le cas échéant. Nous pouvons vous demander des informations supplémentaires pour vérifier que la demande vient bien de vous. N'envoyez jamais de mot de passe, de code de vérification ni de jeton d'accès.</p>
 <p>Nous répondons dans les meilleurs délais et dans le délai prévu par la loi applicable (par exemple un mois selon le RGPD, ou 10 jours selon la loi coréenne sur la protection des informations personnelles).</p>
-<p><strong>Supprimer votre compte dans le jeu.</strong> Depuis l'écran titre, ouvrez Options, puis Compte, puis Supprimer le compte, et appuyez une seconde fois sur le bouton pour confirmer. Cela supprime votre historique de jeu dans le stockage cloud EOS, l'historique, les succès, la collection et le pseudo enregistrés sur l'appareil, le compte de jeu créé pour l'appareil et les liaisons de compte mémorisées sur l'appareil. Le jeu redémarre ensuite comme pour un nouveau joueur. Cette action est irréversible. Si vous aviez lié un compte Epic, Discord ou Apple, le prestataire peut conserver une trace indiquant que ce compte a été relié à ce jeu ; aucune donnée de jeu n'y reste attachée et vous pouvez nous demander par e-mail de la faire supprimer.</p>
+<p><strong>Supprimer votre compte dans le jeu.</strong> Depuis l'écran titre, ouvrez Options, puis Compte, puis Supprimer le compte, et appuyez une seconde fois sur le bouton pour confirmer. Cela supprime votre historique de jeu dans le stockage cloud EOS, l'historique, les succès, la collection et le pseudo enregistrés sur l'appareil, le compte de jeu créé pour l'appareil et les liaisons de compte mémorisées sur l'appareil. Le jeu redémarre ensuite comme pour un nouveau joueur. Cette action est irréversible. Aucun e-mail ni demande séparée n'est nécessaire. Si vous aviez lié un compte Epic, Discord ou Apple, vous pouvez aussi retirer le jeu depuis les paramètres de ce compte, comme indiqué ci-dessous.</p>
 <p>Vous pouvez aussi révoquer l'accès du jeu dans les paramètres de votre compte Epic Games, Discord ou Apple. Révoquer cet accès et supprimer les données sauvegardées par le jeu sont deux démarches distinctes. Pour le chat vocal, vous pouvez activer le mode push-to-talk dans les options ou refuser l'accès au micro dans les réglages de votre appareil.</p>
 
 <h2>8. Utilisateurs hors de Corée</h2>
