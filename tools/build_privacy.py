@@ -58,7 +58,7 @@ TEXT["en"] = dict(
 <h2>1. Information we process and why</h2>
 {table(["Feature", "Information", "Purpose"], [
     ["Basic sign-in", "EOS device-based identifier, Product User ID, sign-in status", "Identify players and provide online services"],
-    ["Optional account linking", "Epic or Discord account identifier, basic profile within the requested scope (such as display name), authentication tokens", "Link the external account you choose to your game data"],
+    ["Optional account linking", "Epic, Discord or Apple account identifier, basic profile within the requested scope (such as display name), authentication tokens", "Link the external account you choose to your game data"],
     ["Online play", "Nickname, lobby, session and gameplay data, network information needed to connect (such as IP address)", "Connect players and keep the game in sync"],
     ["Voice chat", "Voice you send through your microphone", "Let players in the same voice channel talk to each other"],
     ["Saving and sync", "Nickname, match time, mode, player count, online or offline, score, day reached, win or loss, team, MVP, winner, cumulative records, achievements and equipped cosmetics", "Save your play records and sync them to EOS cloud storage"],
@@ -69,6 +69,7 @@ TEXT["en"] = dict(
 
 <h2>2. Account linking and sign-in</h2>
 <p>Linking an Epic or Discord account is optional. The game opens the provider's own sign-in page and never asks for or receives your password. We request only Epic's Basic Profile scope and Discord's identify scope; we do not request your friends list or email address. The Discord access token is used only to complete sign-in and is not kept in the game's save files.</p>
+<p>On iPhone, iPad and the Mac App Store version you can also link with Sign in with Apple. The system's own sign-in sheet is shown, and we do not request your name or email address. The game receives only an identity token containing an identifier that Apple creates for this developer, and passes it to Epic Online Services to link your game data.</p>
 
 <h2>3. Crash and error reports</h2>
 <p>The game uses Unity Cloud Diagnostics, a service of Unity Technologies, to send a report when the game crashes or runs into an unexpected error. A report contains the error message and stack trace, the last few lines of the game log, the game version, platform, operating system, device model and hardware details (such as CPU, GPU and memory), the time of the error and an anonymous device identifier assigned by Unity. Reports do not contain your password, email address, voice or chat content. Log lines may include technical details such as your in-game nickname or a room code.</p>
@@ -76,7 +77,7 @@ TEXT["en"] = dict(
 <p>Depending on the platform, Apple, Google or Valve may also share crash information with us, for example when you have chosen on your device to share analytics with app developers. Those reports follow the platform's settings and privacy policy.</p>
 
 <h2>4. Storage and retention</h2>
-<p>Settings and play records are stored on your device. The game keeps up to 50 recent matches, plus summary records such as total matches, wins and best score. When an EOS account is available, records may sync automatically to Epic Online Services cloud storage. Cloud records are not deleted after a fixed period; they stay until they are overwritten or until you ask us to delete them. Deleting the game or its local files does not delete cloud data.</p>
+<p>Settings and play records are stored on your device. The game keeps up to 50 recent matches, plus summary records such as total matches, wins and best score. When an EOS account is available, records may sync automatically to Epic Online Services cloud storage. Cloud records are not deleted after a fixed period; they stay until they are overwritten, until you delete your account in the game, or until you ask us to delete them. Deleting the game or its local files does not delete cloud data; use Delete Account in the game (section 7) for that.</p>
 <p>Voice chat is sent in real time. The game does not record or store it. Processing needed to carry voice and network traffic follows the service provider's policy.</p>
 <p>We keep emails you send us only as long as needed to handle your request, unless the law requires us to keep them longer. When information is no longer needed, we delete electronic files so they cannot be restored.</p>
 
@@ -85,6 +86,7 @@ TEXT["en"] = dict(
 <ul>
 <li><strong>Epic Games, Inc.</strong> (Epic Online Services): sign-in, account linking, lobbies and P2P connections, voice chat, cloud storage of play records</li>
 <li><strong>Discord Inc.</strong>: sign-in for the Discord account you choose to link</li>
+<li><strong>Apple Inc.</strong>: Sign in with Apple for the Apple account you choose to link (App Store versions only)</li>
 <li><strong>Unity Technologies</strong> (Unity Cloud Diagnostics): crash and error reports</li>
 <li><strong>Valve Corporation</strong> (Steam): achievements and friend invitations in the Steam version</li>
 <li><strong>GitHub, Inc.</strong>: hosting this website</li>
@@ -100,7 +102,8 @@ TEXT["en"] = dict(
 <h2>7. Your rights and choices</h2>
 <p>You can ask us to access, correct, delete or export your information, to unlink an external account from your game data, or to restrict or object to processing. Send requests to {MAIL}. To help us find your records, include your in-game nickname, the platform you play on and the type of any linked account. We may ask for more information to confirm the request comes from you. Never send passwords, verification codes or access tokens.</p>
 <p>We reply without undue delay and within the time required by applicable law (for example, one month under the GDPR, or 10 days under Korea's Personal Information Protection Act).</p>
-<p>You can also revoke the game's access in your Epic Games or Discord account settings. Revoking access there and deleting the game's saved data are separate steps. For voice chat, you can use push-to-talk in Options or deny microphone access in your device settings.</p>
+<p><strong>Deleting your account in the game.</strong> On the title screen, open Options, then Account, then Delete Account, and press the button a second time to confirm. This deletes your play records in EOS cloud storage, the records, achievements, collection and nickname saved on the device, the game account created for the device, and the account links remembered on the device. The game then starts again as a new player. It cannot be undone. If you linked an Epic, Discord or Apple account, the provider may still hold a record that the account was once connected to this game; no game data remains attached to it, and you can ask us by email to have it removed.</p>
+<p>You can also revoke the game's access in your Epic Games, Discord or Apple account settings. Revoking access there and deleting the game's saved data are separate steps. For voice chat, you can use push-to-talk in Options or deny microphone access in your device settings.</p>
 
 <h2>8. International users</h2>
 <h3>8.1 Transfers outside your country</h3>
@@ -108,6 +111,7 @@ TEXT["en"] = dict(
 {table(["Recipient", "Country", "Information", "Purpose", "Retention"], [
     ["Epic Games, Inc.", "United States and other EOS regions", "Identifiers, nickname, gameplay and play records, voice in transit, network information", "Online services, voice chat, cloud saves", "Until you ask us to delete it, or as set out in Epic's policy"],
     ["Discord Inc.", "United States", "Discord account identifier, basic profile", "Account linking", "As set out in Discord's policy"],
+    ["Apple Inc.", "United States", "Apple account identifier created for this developer", "Account linking (Sign in with Apple)", "As set out in Apple's policy"],
     ["Unity Technologies SF", "United States", "Crash and error reports", "Crash diagnosis", "Within Unity's retention period"],
     ["Valve Corporation", "United States", "Steam account identifier, achievements, invitation room code", "Steam features", "As set out in Valve's policy"],
     ["GitHub, Inc.", "United States", "Website access information", "Website hosting", "As set out in GitHub's policy"],
@@ -118,7 +122,7 @@ TEXT["en"] = dict(
 <p>Under the GDPR and UK GDPR, MeMe Games is the controller of your information. We rely on these legal bases:</p>
 <ul>
 <li><strong>Performance of a contract</strong>: sign-in, online play, voice chat, saving and syncing records</li>
-<li><strong>Consent</strong>: linking an Epic or Discord account. You can withdraw consent at any time by unlinking or by contacting us.</li>
+<li><strong>Consent</strong>: linking an Epic, Discord or Apple account. You can withdraw consent at any time by unlinking or by contacting us.</li>
 <li><strong>Legitimate interests</strong>: crash and error reports, security and abuse prevention, website hosting, to keep the game stable and safe. You can object at any time.</li>
 <li><strong>Legal obligation</strong>: when the law requires us to keep or disclose information</li>
 </ul>
@@ -159,7 +163,7 @@ TEXT["ko"] = dict(
 <h2>1. 처리하는 정보와 목적</h2>
 {table(["기능", "정보", "목적"], [
     ["기본 로그인", "EOS 기기 기반 식별자, Product User ID, 로그인 상태", "플레이어 식별 및 온라인 서비스 제공"],
-    ["선택적 계정 연결", "Epic 또는 Discord 계정 식별자, 요청 권한 범위의 기본 프로필(표시 이름 등), 인증 토큰", "이용자가 고른 외부 계정을 게임 데이터와 연결"],
+    ["선택적 계정 연결", "Epic, Discord 또는 Apple 계정 식별자, 요청 권한 범위의 기본 프로필(표시 이름 등), 인증 토큰", "이용자가 고른 외부 계정을 게임 데이터와 연결"],
     ["온라인 플레이", "닉네임, 로비·세션 및 게임 진행 정보, 연결에 필요한 네트워크 정보(IP 주소 등)", "플레이어 연결과 게임 상태 동기화"],
     ["음성 채팅", "마이크로 전송하는 음성", "같은 음성 채널 플레이어 간 대화"],
     ["저장 및 동기화", "닉네임, 경기 시각·모드·플레이어 수·온라인 여부·점수·진행 일차·승패·진영·MVP·승자, 누적 기록, 업적과 착용한 꾸미기 아이템", "플레이 기록 저장 및 EOS 클라우드 동기화"],
@@ -170,6 +174,7 @@ TEXT["ko"] = dict(
 
 <h2>2. 계정 연결과 인증</h2>
 <p>Epic·Discord 계정 연결은 이용자가 선택합니다. 게임은 각 서비스의 로그인 화면을 열 뿐 비밀번호를 묻거나 받지 않습니다. Epic은 Basic Profile, Discord는 identify 권한만 요청하며, 친구 목록과 이메일 주소는 요청하지 않습니다. Discord 접근 토큰은 로그인을 마치는 데만 쓰고 게임 저장 파일에 보관하지 않습니다.</p>
+<p>iPhone, iPad와 Mac App Store 버전에서는 Apple로 로그인으로도 연결할 수 있습니다. 시스템의 로그인 창이 표시되며, 회사는 이름과 이메일 주소를 요청하지 않습니다. 게임은 Apple이 이 개발자용으로 만든 식별자가 담긴 인증 토큰만 받아 Epic Online Services에 전달해 게임 데이터와 연결합니다.</p>
 
 <h2>3. 크래시·오류 보고</h2>
 <p>게임이 충돌하거나 예상하지 못한 오류가 나면 Unity Technologies의 Unity Cloud Diagnostics로 보고서를 보냅니다. 보고서에는 오류 메시지와 스택 트레이스, 게임 로그의 마지막 몇 줄, 게임 버전, 플랫폼, 운영체제, 기기 모델과 하드웨어 정보(CPU·GPU·메모리 등), 오류 발생 시각, Unity가 부여하는 익명 기기 식별자가 담깁니다. 비밀번호, 이메일 주소, 음성, 채팅 내용은 포함하지 않습니다. 다만 로그에 게임 닉네임이나 방 코드 같은 기술 정보가 섞일 수 있습니다.</p>
@@ -177,7 +182,7 @@ TEXT["ko"] = dict(
 <p>플랫폼에 따라 Apple, Google, Valve가 크래시 정보를 회사에 제공할 수 있습니다. 예를 들어 기기에서 앱 개발자와 분석 정보 공유를 허용한 경우입니다. 이 보고는 각 플랫폼의 설정과 개인정보처리방침을 따릅니다.</p>
 
 <h2>4. 저장 위치와 보유 기간</h2>
-<p>설정과 플레이 기록은 기기에 저장됩니다. 최근 경기 기록은 최대 50개이며, 누적 경기 수·승리 수·최고 점수 같은 요약 기록은 따로 유지됩니다. EOS 계정이 준비되면 기록이 Epic Online Services 클라우드 저장소에 자동으로 동기화될 수 있습니다. 클라우드 기록은 정해진 기간이 지나도 자동 삭제되지 않으며, 덮어쓰이거나 이용자가 삭제를 요청할 때까지 유지됩니다. 게임이나 로컬 파일을 지워도 클라우드 데이터는 삭제되지 않습니다.</p>
+<p>설정과 플레이 기록은 기기에 저장됩니다. 최근 경기 기록은 최대 50개이며, 누적 경기 수·승리 수·최고 점수 같은 요약 기록은 따로 유지됩니다. EOS 계정이 준비되면 기록이 Epic Online Services 클라우드 저장소에 자동으로 동기화될 수 있습니다. 클라우드 기록은 정해진 기간이 지나도 자동 삭제되지 않으며, 덮어쓰이거나, 이용자가 게임 안에서 계정을 삭제하거나, 삭제를 요청할 때까지 유지됩니다. 게임이나 로컬 파일을 지워도 클라우드 데이터는 삭제되지 않으므로, 클라우드 데이터까지 지우려면 게임 안의 계정 삭제(7항)를 이용하십시오.</p>
 <p>음성 채팅은 실시간으로 전송되며, 게임은 이를 녹음하거나 저장하지 않습니다. 음성과 네트워크 전송에 필요한 처리는 서비스 제공자의 정책을 따릅니다.</p>
 <p>문의 이메일은 요청을 처리하는 데 필요한 기간만 보관하며, 법령상 더 오래 보관해야 하는 경우는 예외로 합니다. 보유 기간이 끝난 정보는 복구할 수 없는 방법으로 전자 파일을 삭제합니다.</p>
 
@@ -186,6 +191,7 @@ TEXT["ko"] = dict(
 <ul>
 <li><strong>Epic Games, Inc.</strong>(Epic Online Services): 로그인, 계정 연결, 로비·P2P 연결, 음성 채팅, 플레이 기록 클라우드 저장</li>
 <li><strong>Discord Inc.</strong>: 이용자가 연결한 Discord 계정의 로그인</li>
+<li><strong>Apple Inc.</strong>: 이용자가 연결한 Apple 계정의 Apple로 로그인(App Store 버전만 해당)</li>
 <li><strong>Unity Technologies</strong>(Unity Cloud Diagnostics): 크래시·오류 보고</li>
 <li><strong>Valve Corporation</strong>(Steam): Steam 버전의 업적과 친구 초대</li>
 <li><strong>GitHub, Inc.</strong>: 이 웹사이트 호스팅</li>
@@ -201,7 +207,8 @@ TEXT["ko"] = dict(
 <h2>7. 이용자의 권리와 선택</h2>
 <p>이용자는 자신의 정보에 대한 열람, 정정, 삭제, 이동(내보내기), 외부 계정 연결 해제, 처리 정지 및 처리 반대를 요청할 수 있습니다. 요청은 {MAIL}로 보내 주세요. 기록을 찾을 수 있도록 게임 닉네임, 플레이하는 플랫폼, 연결한 계정 종류를 함께 적어 주시면 됩니다. 본인 확인을 위해 추가 정보를 요청할 수 있습니다. 비밀번호, 인증 코드, 접근 토큰은 절대 보내지 마세요.</p>
 <p>회사는 지체 없이, 관계 법령이 정한 기간 안에 답변합니다(예: 개인정보 보호법상 10일, GDPR상 1개월).</p>
-<p>Epic Games나 Discord 계정 설정에서도 게임의 접근 권한을 철회할 수 있습니다. 외부 서비스의 권한 철회와 게임 저장 데이터 삭제는 서로 다른 절차입니다. 음성 채팅은 옵션에서 누르는 동안만 말하기로 바꾸거나, 기기 설정에서 마이크 권한을 거부할 수 있습니다.</p>
+<p><strong>게임 안에서 계정 삭제.</strong> 타이틀 화면에서 옵션, 계정, 계정 삭제 순서로 들어가 버튼을 한 번 더 눌러 확인하면 계정이 삭제됩니다. EOS 클라우드 저장소의 플레이 기록, 기기에 저장된 기록·업적·도감·닉네임, 기기에 만들어진 게임 계정, 기기에 기억된 계정 연결 정보가 삭제되고 게임은 새 이용자로 다시 시작합니다. 삭제는 되돌릴 수 없습니다. Epic, Discord 또는 Apple 계정을 연결했다면 해당 업체에 이 게임과 연결된 적이 있다는 기록이 남을 수 있습니다. 그 기록에 연결된 게임 데이터는 남지 않으며, 이메일로 요청하면 이 기록의 삭제를 처리합니다.</p>
+<p>Epic Games, Discord, Apple 계정 설정에서도 게임의 접근 권한을 철회할 수 있습니다. 외부 서비스의 권한 철회와 게임 저장 데이터 삭제는 서로 다른 절차입니다. 음성 채팅은 옵션에서 누르는 동안만 말하기로 바꾸거나, 기기 설정에서 마이크 권한을 거부할 수 있습니다.</p>
 
 <h2>8. 해외 이용자 안내</h2>
 <h3>8.1 개인정보의 국외 이전</h3>
@@ -209,6 +216,7 @@ TEXT["ko"] = dict(
 {table(["이전받는 자", "국가", "이전 항목", "목적", "보유 기간"], [
     ["Epic Games, Inc.", "미국 및 기타 EOS 지역", "식별자, 닉네임, 게임 진행·플레이 기록, 전송 중인 음성, 네트워크 정보", "온라인 서비스, 음성 채팅, 클라우드 저장", "삭제 요청 시까지 또는 Epic 정책에 따름"],
     ["Discord Inc.", "미국", "Discord 계정 식별자, 기본 프로필", "계정 연결", "Discord 정책에 따름"],
+    ["Apple Inc.", "미국", "이 개발자용으로 만들어진 Apple 계정 식별자", "계정 연결(Apple로 로그인)", "Apple 정책에 따름"],
     ["Unity Technologies SF", "미국", "크래시·오류 보고", "크래시 진단", "Unity 보관 기간 이내"],
     ["Valve Corporation", "미국", "Steam 계정 식별자, 업적, 초대 방 코드", "Steam 기능", "Valve 정책에 따름"],
     ["GitHub, Inc.", "미국", "웹사이트 접속 정보", "웹사이트 호스팅", "GitHub 정책에 따름"],
@@ -219,7 +227,7 @@ TEXT["ko"] = dict(
 <p>GDPR 및 UK GDPR에 따라 회사는 이용자 정보의 컨트롤러입니다. 회사는 다음 법적 근거에 따라 처리합니다.</p>
 <ul>
 <li><strong>계약 이행</strong>: 로그인, 온라인 플레이, 음성 채팅, 기록 저장과 동기화</li>
-<li><strong>동의</strong>: Epic·Discord 계정 연결. 연결을 해제하거나 회사에 요청해 언제든 동의를 철회할 수 있습니다.</li>
+<li><strong>동의</strong>: Epic·Discord·Apple 계정 연결. 연결을 해제하거나 회사에 요청해 언제든 동의를 철회할 수 있습니다.</li>
 <li><strong>정당한 이익</strong>: 게임을 안정적이고 안전하게 유지하기 위한 크래시·오류 보고, 보안과 부정 이용 방지, 웹사이트 호스팅. 언제든 반대할 수 있습니다.</li>
 <li><strong>법적 의무</strong>: 법령에 따라 정보를 보관하거나 제공해야 하는 경우</li>
 </ul>
@@ -260,7 +268,7 @@ TEXT["ja"] = dict(
 <h2>1. 取り扱う情報と目的</h2>
 {table(["機能", "情報", "目的"], [
     ["基本ログイン", "EOSデバイスベースの識別子、Product User ID、ログイン状態", "プレイヤーの識別とオンラインサービスの提供"],
-    ["任意のアカウント連携", "EpicまたはDiscordのアカウント識別子、要求する権限の範囲内の基本プロフィール（表示名など）、認証トークン", "お客様が選んだ外部アカウントとゲームデータの連携"],
+    ["任意のアカウント連携", "Epic、DiscordまたはAppleのアカウント識別子、要求する権限の範囲内の基本プロフィール（表示名など）、認証トークン", "お客様が選んだ外部アカウントとゲームデータの連携"],
     ["オンラインプレイ", "ニックネーム、ロビー・セッションおよびゲーム進行の情報、接続に必要なネットワーク情報（IPアドレスなど）", "プレイヤーの接続とゲーム状態の同期"],
     ["ボイスチャット", "マイクから送信する音声", "同じボイスチャンネルのプレイヤー同士の会話"],
     ["保存と同期", "ニックネーム、試合の日時・モード・人数・オンラインかどうか・スコア・到達日数・勝敗・陣営・MVP・勝者、累計記録、実績と装備中のコスメ", "プレイ記録の保存とEOSクラウドへの同期"],
@@ -271,6 +279,7 @@ TEXT["ja"] = dict(
 
 <h2>2. アカウント連携と認証</h2>
 <p>EpicやDiscordとの連携は任意です。ゲームは各サービスのログイン画面を開くだけで、パスワードを尋ねたり受け取ったりしません。EpicはBasic Profile、Discordはidentifyの権限のみを要求し、フレンドリストやメールアドレスは要求しません。Discordのアクセストークンはログインの完了にのみ使い、ゲームのセーブファイルには保存しません。</p>
+<p>iPhone、iPadおよびMac App Store版では、Appleでサインインによる連携もできます。システムのサインイン画面が表示され、当社は氏名やメールアドレスを要求しません。ゲームは、Appleがこの開発者向けに作成した識別子を含む認証トークンのみを受け取り、ゲームデータと連携するためにEpic Online Servicesへ渡します。</p>
 
 <h2>3. クラッシュ・エラーレポート</h2>
 <p>ゲームがクラッシュしたり予期しないエラーが起きたりすると、Unity TechnologiesのサービスであるUnity Cloud Diagnosticsにレポートを送信します。レポートには、エラーメッセージとスタックトレース、ゲームログの最後の数行、ゲームのバージョン、プラットフォーム、OS、端末モデルとハードウェア情報（CPU・GPU・メモリなど）、エラー発生時刻、Unityが付与する匿名の端末識別子が含まれます。パスワード、メールアドレス、音声、チャットの内容は含まれません。ただし、ログにはゲーム内ニックネームやルームコードなどの技術的な情報が含まれることがあります。</p>
@@ -278,7 +287,7 @@ TEXT["ja"] = dict(
 <p>プラットフォームによっては、Apple、Google、Valveがクラッシュ情報を当社に提供することがあります。たとえば、お客様が端末でアプリデベロッパとの解析データ共有を許可している場合です。これらのレポートは各プラットフォームの設定とプライバシーポリシーに従います。</p>
 
 <h2>4. 保存場所と保存期間</h2>
-<p>設定とプレイ記録は端末に保存されます。直近の試合記録は最大50件で、累計試合数・勝利数・最高スコアなどの要約記録は別に保持されます。EOSアカウントが準備できると、記録がEpic Online Servicesのクラウドストレージに自動で同期されることがあります。クラウドの記録は一定期間が過ぎても自動では削除されず、上書きされるか、お客様から削除の依頼があるまで保持されます。ゲームやローカルファイルを削除しても、クラウドのデータは削除されません。</p>
+<p>設定とプレイ記録は端末に保存されます。直近の試合記録は最大50件で、累計試合数・勝利数・最高スコアなどの要約記録は別に保持されます。EOSアカウントが準備できると、記録がEpic Online Servicesのクラウドストレージに自動で同期されることがあります。クラウドの記録は一定期間が過ぎても自動では削除されず、上書きされるか、お客様がゲーム内でアカウントを削除するか、削除の依頼があるまで保持されます。ゲームやローカルファイルを削除しても、クラウドのデータは削除されません。クラウドのデータも削除するには、ゲーム内のアカウント削除（第7項）をご利用ください。</p>
 <p>ボイスチャットはリアルタイムで送信され、ゲームが録音・保存することはありません。音声やネットワーク通信に必要な処理は、サービス提供者のポリシーに従います。</p>
 <p>お問い合わせのメールは、対応に必要な期間に限って保管します（法令でより長い保管が必要な場合を除きます）。不要になった情報は、復元できない方法で電子ファイルを削除します。</p>
 
@@ -287,6 +296,7 @@ TEXT["ja"] = dict(
 <ul>
 <li><strong>Epic Games, Inc.</strong>（Epic Online Services）：ログイン、アカウント連携、ロビー・P2P接続、ボイスチャット、プレイ記録のクラウド保存</li>
 <li><strong>Discord Inc.</strong>：お客様が連携するDiscordアカウントのログイン</li>
+<li><strong>Apple Inc.</strong>：お客様が連携するAppleアカウントのAppleでサインイン（App Store版のみ）</li>
 <li><strong>Unity Technologies</strong>（Unity Cloud Diagnostics）：クラッシュ・エラーレポート</li>
 <li><strong>Valve Corporation</strong>（Steam）：Steam版の実績とフレンド招待</li>
 <li><strong>GitHub, Inc.</strong>：本ウェブサイトのホスティング</li>
@@ -302,7 +312,8 @@ TEXT["ja"] = dict(
 <h2>7. お客様の権利と選択</h2>
 <p>お客様は、ご自身の情報の開示、訂正、削除、エクスポート、外部アカウント連携の解除、処理の制限や処理への異議を当社に求めることができます。ご依頼は{MAIL}までお送りください。記録を探せるよう、ゲーム内ニックネーム、プレイしているプラットフォーム、連携しているアカウントの種類をお書き添えください。ご本人確認のため追加の情報をお願いすることがあります。パスワード、認証コード、アクセストークンは絶対に送らないでください。</p>
 <p>当社は遅滞なく、適用される法令が定める期間内（例：GDPRでは1か月、韓国の個人情報保護法では10日）に回答します。</p>
-<p>Epic GamesやDiscordのアカウント設定からも、ゲームのアクセス権限を取り消せます。外部サービスでの権限の取り消しと、ゲームの保存データの削除は別の手続きです。ボイスチャットは、オプションでプッシュトゥトークに切り替えるか、端末の設定でマイクへのアクセスを拒否できます。</p>
+<p><strong>ゲーム内でのアカウント削除。</strong>タイトル画面でオプション、アカウント、アカウント削除の順に開き、ボタンをもう一度押して確認すると、アカウントが削除されます。EOSクラウドストレージのプレイ記録、端末に保存された記録・実績・図鑑・ニックネーム、端末用に作成されたゲームアカウント、端末に記憶された連携情報が削除され、ゲームは新しいプレイヤーとして始まります。削除は元に戻せません。Epic、DiscordまたはAppleのアカウントを連携していた場合、各事業者にこのゲームと連携していたという記録が残ることがあります。その記録にゲームデータは残らず、メールでご依頼いただければこの記録の削除に対応します。</p>
+<p>Epic Games、Discord、Appleのアカウント設定からも、ゲームのアクセス権限を取り消せます。外部サービスでの権限の取り消しと、ゲームの保存データの削除は別の手続きです。ボイスチャットは、オプションでプッシュトゥトークに切り替えるか、端末の設定でマイクへのアクセスを拒否できます。</p>
 
 <h2>8. 海外のお客様へ</h2>
 <h3>8.1 国外への移転</h3>
@@ -310,6 +321,7 @@ TEXT["ja"] = dict(
 {table(["移転先", "国", "項目", "目的", "保存期間"], [
     ["Epic Games, Inc.", "米国およびその他のEOS地域", "識別子、ニックネーム、ゲーム進行・プレイ記録、送信中の音声、ネットワーク情報", "オンラインサービス、ボイスチャット、クラウド保存", "削除のご依頼まで、またはEpicのポリシーによる"],
     ["Discord Inc.", "米国", "Discordアカウント識別子、基本プロフィール", "アカウント連携", "Discordのポリシーによる"],
+    ["Apple Inc.", "米国", "この開発者向けに作成されたAppleアカウント識別子", "アカウント連携（Appleでサインイン）", "Appleのポリシーによる"],
     ["Unity Technologies SF", "米国", "クラッシュ・エラーレポート", "クラッシュの診断", "Unityの保存期間内"],
     ["Valve Corporation", "米国", "Steamアカウント識別子、実績、招待のルームコード", "Steam機能", "Valveのポリシーによる"],
     ["GitHub, Inc.", "米国", "ウェブサイトのアクセス情報", "ウェブサイトのホスティング", "GitHubのポリシーによる"],
@@ -320,7 +332,7 @@ TEXT["ja"] = dict(
 <p>GDPRおよびUK GDPRにおいて、当社はお客様の情報の管理者（controller）です。当社は次の法的根拠に基づいて取り扱います。</p>
 <ul>
 <li><strong>契約の履行</strong>：ログイン、オンラインプレイ、ボイスチャット、記録の保存と同期</li>
-<li><strong>同意</strong>：EpicまたはDiscordアカウントの連携。連携の解除または当社へのご連絡により、いつでも同意を撤回できます。</li>
+<li><strong>同意</strong>：Epic、DiscordまたはAppleアカウントの連携。連携の解除または当社へのご連絡により、いつでも同意を撤回できます。</li>
 <li><strong>正当な利益</strong>：ゲームを安定・安全に保つためのクラッシュ・エラーレポート、セキュリティと不正利用の防止、ウェブサイトのホスティング。いつでも異議を申し立てられます。</li>
 <li><strong>法的義務</strong>：法令により情報の保管や開示が必要な場合</li>
 </ul>
@@ -361,7 +373,7 @@ TEXT["zh-Hans"] = dict(
 <h2>1. 我们处理的信息及目的</h2>
 {table(["功能", "信息", "目的"], [
     ["基本登录", "EOS 设备标识符、Product User ID、登录状态", "识别玩家并提供在线服务"],
-    ["可选的账户关联", "Epic 或 Discord 账户标识符、所请求权限范围内的基本资料（如显示名称）、认证令牌", "将您选择的外部账户与游戏数据关联"],
+    ["可选的账户关联", "Epic、Discord 或 Apple 账户标识符、所请求权限范围内的基本资料（如显示名称）、认证令牌", "将您选择的外部账户与游戏数据关联"],
     ["在线游戏", "昵称、大厅、会话和游戏进度信息、连接所需的网络信息（如 IP 地址）", "连接玩家并同步游戏状态"],
     ["语音聊天", "您通过麦克风发送的语音", "让同一语音频道的玩家相互交谈"],
     ["保存与同步", "昵称、对局时间、模式、人数、是否在线、分数、到达天数、胜负、阵营、MVP、胜者、累计记录、成就及已装备的装扮", "保存游戏记录并同步到 EOS 云存储"],
@@ -372,6 +384,7 @@ TEXT["zh-Hans"] = dict(
 
 <h2>2. 账户关联与登录</h2>
 <p>关联 Epic 或 Discord 账户完全由您选择。游戏只会打开相应服务自己的登录页面，不会询问或接收您的密码。我们只请求 Epic 的 Basic Profile 权限和 Discord 的 identify 权限，不请求您的好友列表或电子邮件地址。Discord 访问令牌仅用于完成登录，不会保存在游戏存档文件中。</p>
+<p>在 iPhone、iPad 和 Mac App Store 版本中，您还可以通过“通过 Apple 登录”进行关联。届时会显示系统自带的登录界面，我们不会请求您的姓名或电子邮件地址。游戏只会收到一个身份令牌，其中包含 Apple 为本开发者生成的标识符，并将其传给 Epic Online Services 以关联您的游戏数据。</p>
 
 <h2>3. 崩溃和错误报告</h2>
 <p>当游戏崩溃或出现意外错误时，游戏会通过 Unity Technologies 提供的 Unity Cloud Diagnostics 发送报告。报告包含错误信息和堆栈跟踪、游戏日志的最后几行、游戏版本、平台、操作系统、设备型号和硬件信息（如 CPU、GPU 和内存）、错误发生时间，以及 Unity 分配的匿名设备标识符。报告不包含您的密码、电子邮件地址、语音或聊天内容，但日志中可能含有游戏内昵称或房间代码等技术信息。</p>
@@ -379,7 +392,7 @@ TEXT["zh-Hans"] = dict(
 <p>根据平台不同，Apple、Google 或 Valve 也可能向我们提供崩溃信息，例如当您在设备上选择与应用开发者共享分析数据时。这些报告遵循各平台的设置和隐私政策。</p>
 
 <h2>4. 存储位置与保留期限</h2>
-<p>设置和游戏记录保存在您的设备上。游戏最多保留 50 场最近的对局记录，另外保留总对局数、胜场数和最高分等汇总记录。当 EOS 账户可用时，记录可能会自动同步到 Epic Online Services 云存储。云端记录不会在固定期限后自动删除，而是保留到被覆盖或您要求我们删除为止。删除游戏或本地文件不会删除云端数据。</p>
+<p>设置和游戏记录保存在您的设备上。游戏最多保留 50 场最近的对局记录，另外保留总对局数、胜场数和最高分等汇总记录。当 EOS 账户可用时，记录可能会自动同步到 Epic Online Services 云存储。云端记录不会在固定期限后自动删除，而是保留到被覆盖、您在游戏内删除账户或您要求我们删除为止。删除游戏或本地文件不会删除云端数据；如需一并删除云端数据，请使用游戏内的删除账户功能（第 7 条）。</p>
 <p>语音聊天实时传输，游戏不会录制或保存。传输语音和网络流量所需的处理遵循服务提供商的政策。</p>
 <p>您发给我们的电子邮件仅在处理请求所需的期间内保存，法律要求更长保存期限的除外。不再需要的信息，我们会以无法恢复的方式删除电子文件。</p>
 
@@ -388,6 +401,7 @@ TEXT["zh-Hans"] = dict(
 <ul>
 <li><strong>Epic Games, Inc.</strong>（Epic Online Services）：登录、账户关联、大厅与 P2P 连接、语音聊天、游戏记录云存储</li>
 <li><strong>Discord Inc.</strong>：您选择关联的 Discord 账户登录</li>
+<li><strong>Apple Inc.</strong>：您选择关联的 Apple 账户的“通过 Apple 登录”（仅限 App Store 版本）</li>
 <li><strong>Unity Technologies</strong>（Unity Cloud Diagnostics）：崩溃和错误报告</li>
 <li><strong>Valve Corporation</strong>（Steam）：Steam 版的成就和好友邀请</li>
 <li><strong>GitHub, Inc.</strong>：托管本网站</li>
@@ -403,7 +417,8 @@ TEXT["zh-Hans"] = dict(
 <h2>7. 您的权利与选择</h2>
 <p>您可以要求我们查阅、更正、删除或导出您的信息，解除外部账户与游戏数据的关联，或限制处理、反对处理。请将请求发送至 {MAIL}。为便于查找您的记录，请写明游戏内昵称、游玩的平台以及已关联账户的类型。我们可能会要求提供更多信息以确认请求来自您本人。请勿发送密码、验证码或访问令牌。</p>
 <p>我们会在不无故拖延的情况下，于适用法律规定的期限内答复（例如 GDPR 规定的一个月，或韩国《个人信息保护法》规定的 10 天）。</p>
-<p>您也可以在 Epic Games 或 Discord 的账户设置中撤销游戏的访问权限。在外部服务撤销权限与删除游戏保存的数据是两个独立的步骤。对于语音聊天，您可以在选项中改为按键通话，或在设备设置中拒绝麦克风权限。</p>
+<p><strong>在游戏内删除账户。</strong>在标题画面依次打开选项、账户、删除账户，并再按一次按钮确认，即可删除账户。此操作会删除 EOS 云存储中的游戏记录、设备上保存的记录、成就、图鉴和昵称、为该设备创建的游戏账户，以及设备上记住的账户关联信息，之后游戏会以新玩家身份重新开始。删除后无法恢复。如果您关联过 Epic、Discord 或 Apple 账户，相应服务商处可能仍留有该账户曾与本游戏关联的记录；该记录不再关联任何游戏数据，您可以通过电子邮件要求我们删除。</p>
+<p>您也可以在 Epic Games、Discord 或 Apple 的账户设置中撤销游戏的访问权限。在外部服务撤销权限与删除游戏保存的数据是两个独立的步骤。对于语音聊天，您可以在选项中改为按键通话，或在设备设置中拒绝麦克风权限。</p>
 
 <h2>8. 海外用户须知</h2>
 <h3>8.1 跨境传输</h3>
@@ -411,6 +426,7 @@ TEXT["zh-Hans"] = dict(
 {table(["接收方", "国家", "信息", "目的", "保留期限"], [
     ["Epic Games, Inc.", "美国及其他 EOS 地区", "标识符、昵称、游戏进度与记录、传输中的语音、网络信息", "在线服务、语音聊天、云存档", "直至您要求删除，或依照 Epic 的政策"],
     ["Discord Inc.", "美国", "Discord 账户标识符、基本资料", "账户关联", "依照 Discord 的政策"],
+    ["Apple Inc.", "美国", "为本开发者生成的 Apple 账户标识符", "账户关联（通过 Apple 登录）", "依照 Apple 的政策"],
     ["Unity Technologies SF", "美国", "崩溃和错误报告", "崩溃诊断", "在 Unity 的保留期限内"],
     ["Valve Corporation", "美国", "Steam 账户标识符、成就、邀请中的房间代码", "Steam 功能", "依照 Valve 的政策"],
     ["GitHub, Inc.", "美国", "网站访问信息", "网站托管", "依照 GitHub 的政策"],
@@ -421,7 +437,7 @@ TEXT["zh-Hans"] = dict(
 <p>根据 GDPR 和英国 GDPR，MeMe Games 是您信息的控制者。我们依据以下法律基础处理信息：</p>
 <ul>
 <li><strong>履行合同</strong>：登录、在线游戏、语音聊天、保存和同步记录</li>
-<li><strong>同意</strong>：关联 Epic 或 Discord 账户。您可以随时通过解除关联或联系我们撤回同意。</li>
+<li><strong>同意</strong>：关联 Epic、Discord 或 Apple 账户。您可以随时通过解除关联或联系我们撤回同意。</li>
 <li><strong>正当利益</strong>：为保持游戏稳定和安全而进行的崩溃和错误报告、安全与防止滥用、网站托管。您可以随时提出反对。</li>
 <li><strong>法律义务</strong>：法律要求我们保存或披露信息时</li>
 </ul>
@@ -462,7 +478,7 @@ TEXT["fr"] = dict(
 <h2>1. Informations traitées et finalités</h2>
 {table(["Fonction", "Informations", "Finalité"], [
     ["Connexion de base", "Identifiant EOS lié à l'appareil, Product User ID, état de connexion", "Identifier les joueurs et fournir les services en ligne"],
-    ["Liaison de compte facultative", "Identifiant du compte Epic ou Discord, profil de base dans la limite des autorisations demandées (comme le nom affiché), jetons d'authentification", "Lier le compte externe de votre choix à vos données de jeu"],
+    ["Liaison de compte facultative", "Identifiant du compte Epic, Discord ou Apple, profil de base dans la limite des autorisations demandées (comme le nom affiché), jetons d'authentification", "Lier le compte externe de votre choix à vos données de jeu"],
     ["Jeu en ligne", "Pseudo, données de salon, de session et de partie, informations réseau nécessaires à la connexion (comme l'adresse IP)", "Connecter les joueurs et synchroniser la partie"],
     ["Chat vocal", "La voix que vous transmettez par votre micro", "Permettre aux joueurs d'un même canal vocal de se parler"],
     ["Sauvegarde et synchronisation", "Pseudo, date, mode et nombre de joueurs de la partie, en ligne ou non, score, jour atteint, victoire ou défaite, camp, MVP, gagnant, statistiques cumulées, succès et cosmétiques équipés", "Enregistrer votre historique et le synchroniser avec le stockage cloud EOS"],
@@ -473,6 +489,7 @@ TEXT["fr"] = dict(
 
 <h2>2. Liaison de compte et connexion</h2>
 <p>La liaison d'un compte Epic ou Discord est facultative. Le jeu ouvre la page de connexion du service concerné et ne demande ni ne reçoit jamais votre mot de passe. Nous demandons uniquement l'autorisation Basic Profile d'Epic et l'autorisation identify de Discord ; nous ne demandons ni votre liste d'amis ni votre adresse e-mail. Le jeton d'accès Discord sert uniquement à finaliser la connexion et n'est pas conservé dans les fichiers de sauvegarde du jeu.</p>
+<p>Sur iPhone, iPad et dans la version Mac App Store, vous pouvez aussi lier votre compte avec Se connecter avec Apple. La fenêtre de connexion du système s'affiche et nous ne demandons ni votre nom ni votre adresse e-mail. Le jeu reçoit uniquement un jeton d'identité contenant un identifiant créé par Apple pour ce développeur, et le transmet à Epic Online Services pour lier vos données de jeu.</p>
 
 <h2>3. Rapports de plantage et d'erreur</h2>
 <p>Lorsque le jeu plante ou rencontre une erreur inattendue, il envoie un rapport via Unity Cloud Diagnostics, un service de Unity Technologies. Le rapport contient le message d'erreur et la trace de pile, les dernières lignes du journal du jeu, la version du jeu, la plateforme, le système d'exploitation, le modèle et le matériel de l'appareil (processeur, carte graphique, mémoire, etc.), l'heure de l'erreur et un identifiant d'appareil anonyme attribué par Unity. Il ne contient ni votre mot de passe, ni votre adresse e-mail, ni votre voix, ni le contenu de vos discussions. Le journal peut toutefois contenir des informations techniques comme votre pseudo ou un code de salon.</p>
@@ -480,7 +497,7 @@ TEXT["fr"] = dict(
 <p>Selon la plateforme, Apple, Google ou Valve peuvent aussi nous transmettre des informations de plantage, par exemple si vous avez choisi sur votre appareil de partager les données d'analyse avec les développeurs. Ces rapports relèvent des réglages et de la politique de confidentialité de la plateforme.</p>
 
 <h2>4. Stockage et durée de conservation</h2>
-<p>Les réglages et l'historique de jeu sont stockés sur votre appareil. Le jeu conserve jusqu'à 50 parties récentes, ainsi que des statistiques récapitulatives comme le nombre total de parties, de victoires et le meilleur score. Lorsqu'un compte EOS est disponible, l'historique peut être synchronisé automatiquement avec le stockage cloud d'Epic Online Services. Les données cloud ne sont pas supprimées automatiquement après un délai fixe ; elles sont conservées jusqu'à ce qu'elles soient écrasées ou que vous nous demandiez de les supprimer. Supprimer le jeu ou ses fichiers locaux ne supprime pas les données cloud.</p>
+<p>Les réglages et l'historique de jeu sont stockés sur votre appareil. Le jeu conserve jusqu'à 50 parties récentes, ainsi que des statistiques récapitulatives comme le nombre total de parties, de victoires et le meilleur score. Lorsqu'un compte EOS est disponible, l'historique peut être synchronisé automatiquement avec le stockage cloud d'Epic Online Services. Les données cloud ne sont pas supprimées automatiquement après un délai fixe ; elles sont conservées jusqu'à ce qu'elles soient écrasées, que vous supprimiez votre compte dans le jeu ou que vous nous demandiez de les supprimer. Supprimer le jeu ou ses fichiers locaux ne supprime pas les données cloud ; utilisez pour cela Supprimer le compte dans le jeu (section 7).</p>
 <p>Le chat vocal est transmis en temps réel ; le jeu ne l'enregistre ni ne le conserve. Le traitement nécessaire au transport de la voix et du trafic réseau relève de la politique du prestataire.</p>
 <p>Nous conservons les e-mails que vous nous envoyez le temps nécessaire pour traiter votre demande, sauf obligation légale de conservation plus longue. Lorsque des informations ne sont plus nécessaires, nous supprimons les fichiers électroniques de manière irréversible.</p>
 
@@ -489,6 +506,7 @@ TEXT["fr"] = dict(
 <ul>
 <li><strong>Epic Games, Inc.</strong> (Epic Online Services) : connexion, liaison de compte, salons et connexions P2P, chat vocal, stockage cloud de l'historique</li>
 <li><strong>Discord Inc.</strong> : connexion du compte Discord que vous choisissez de lier</li>
+<li><strong>Apple Inc.</strong> : Se connecter avec Apple pour le compte Apple que vous choisissez de lier (versions App Store uniquement)</li>
 <li><strong>Unity Technologies</strong> (Unity Cloud Diagnostics) : rapports de plantage et d'erreur</li>
 <li><strong>Valve Corporation</strong> (Steam) : succès et invitations d'amis dans la version Steam</li>
 <li><strong>GitHub, Inc.</strong> : hébergement de ce site</li>
@@ -504,7 +522,8 @@ TEXT["fr"] = dict(
 <h2>7. Vos droits et vos choix</h2>
 <p>Vous pouvez nous demander d'accéder à vos informations, de les rectifier, de les supprimer ou de les exporter, de délier un compte externe de vos données de jeu, ou de limiter le traitement ou de vous y opposer. Envoyez votre demande à {MAIL}. Pour nous aider à retrouver vos données, indiquez votre pseudo, la plateforme sur laquelle vous jouez et le type de compte lié, le cas échéant. Nous pouvons vous demander des informations supplémentaires pour vérifier que la demande vient bien de vous. N'envoyez jamais de mot de passe, de code de vérification ni de jeton d'accès.</p>
 <p>Nous répondons dans les meilleurs délais et dans le délai prévu par la loi applicable (par exemple un mois selon le RGPD, ou 10 jours selon la loi coréenne sur la protection des informations personnelles).</p>
-<p>Vous pouvez aussi révoquer l'accès du jeu dans les paramètres de votre compte Epic Games ou Discord. Révoquer cet accès et supprimer les données sauvegardées par le jeu sont deux démarches distinctes. Pour le chat vocal, vous pouvez activer le mode push-to-talk dans les options ou refuser l'accès au micro dans les réglages de votre appareil.</p>
+<p><strong>Supprimer votre compte dans le jeu.</strong> Depuis l'écran titre, ouvrez Options, puis Compte, puis Supprimer le compte, et appuyez une seconde fois sur le bouton pour confirmer. Cela supprime votre historique de jeu dans le stockage cloud EOS, l'historique, les succès, la collection et le pseudo enregistrés sur l'appareil, le compte de jeu créé pour l'appareil et les liaisons de compte mémorisées sur l'appareil. Le jeu redémarre ensuite comme pour un nouveau joueur. Cette action est irréversible. Si vous aviez lié un compte Epic, Discord ou Apple, le prestataire peut conserver une trace indiquant que ce compte a été relié à ce jeu ; aucune donnée de jeu n'y reste attachée et vous pouvez nous demander par e-mail de la faire supprimer.</p>
+<p>Vous pouvez aussi révoquer l'accès du jeu dans les paramètres de votre compte Epic Games, Discord ou Apple. Révoquer cet accès et supprimer les données sauvegardées par le jeu sont deux démarches distinctes. Pour le chat vocal, vous pouvez activer le mode push-to-talk dans les options ou refuser l'accès au micro dans les réglages de votre appareil.</p>
 
 <h2>8. Utilisateurs hors de Corée</h2>
 <h3>8.1 Transferts hors de votre pays</h3>
@@ -512,6 +531,7 @@ TEXT["fr"] = dict(
 {table(["Destinataire", "Pays", "Informations", "Finalité", "Conservation"], [
     ["Epic Games, Inc.", "États-Unis et autres régions EOS", "Identifiants, pseudo, données de partie et historique, voix en transit, informations réseau", "Services en ligne, chat vocal, sauvegardes cloud", "Jusqu'à votre demande de suppression, ou selon la politique d'Epic"],
     ["Discord Inc.", "États-Unis", "Identifiant du compte Discord, profil de base", "Liaison de compte", "Selon la politique de Discord"],
+    ["Apple Inc.", "États-Unis", "Identifiant de compte Apple créé pour ce développeur", "Liaison de compte (Se connecter avec Apple)", "Selon la politique d'Apple"],
     ["Unity Technologies SF", "États-Unis", "Rapports de plantage et d'erreur", "Diagnostic des plantages", "Dans la limite de la durée de conservation de Unity"],
     ["Valve Corporation", "États-Unis", "Identifiant du compte Steam, succès, code de salon des invitations", "Fonctions Steam", "Selon la politique de Valve"],
     ["GitHub, Inc.", "États-Unis", "Informations de connexion au site", "Hébergement du site", "Selon la politique de GitHub"],
@@ -522,7 +542,7 @@ TEXT["fr"] = dict(
 <p>Au sens du RGPD et du RGPD britannique, MeMe Games est responsable du traitement de vos informations. Nous nous fondons sur les bases légales suivantes :</p>
 <ul>
 <li><strong>Exécution d'un contrat</strong> : connexion, jeu en ligne, chat vocal, sauvegarde et synchronisation de l'historique</li>
-<li><strong>Consentement</strong> : liaison d'un compte Epic ou Discord. Vous pouvez retirer votre consentement à tout moment en déliant le compte ou en nous contactant.</li>
+<li><strong>Consentement</strong> : liaison d'un compte Epic, Discord ou Apple. Vous pouvez retirer votre consentement à tout moment en déliant le compte ou en nous contactant.</li>
 <li><strong>Intérêt légitime</strong> : rapports de plantage et d'erreur, sécurité et prévention des abus, hébergement du site, afin de garder le jeu stable et sûr. Vous pouvez vous y opposer à tout moment.</li>
 <li><strong>Obligation légale</strong> : lorsque la loi nous impose de conserver ou de communiquer des informations</li>
 </ul>
