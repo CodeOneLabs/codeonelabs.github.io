@@ -9,6 +9,8 @@ from pathlib import Path
 SITE = "https://codeonelabs.github.io"
 EMAIL = "codeone.unity@gmail.com"
 MAIL = f'<a href="mailto:{EMAIL}">{EMAIL}</a>'
+# Bump when style.css changes so browsers drop the cached copy.
+CSS_VERSION = "20261005b"
 ROOT = Path(__file__).resolve().parent.parent
 
 LINKS = {
@@ -553,7 +555,7 @@ def lang_switcher(current, label):
     for code, file, name in LANGS:
         cur = ' aria-current="page"' if code == current else ""
         items.append(f'<a href="{file}" hreflang="{code}" lang="{code}"{cur}>{name}</a>')
-    return f'<p class="langs" role="navigation" aria-label="{label}">' + "".join(items) + "</p>"
+    return f'<p class="langs" role="navigation" aria-label="{label}">' + " <span aria-hidden=\"true\">·</span> ".join(items) + "</p>"
 
 
 def page(code, file):
@@ -566,7 +568,7 @@ def page(code, file):
         f'<meta name="viewport" content="width=device-width,initial-scale=1">'
         f'<meta name="description" content="{t["desc"]}"><title>{t["title"]} · MeMe Games</title>'
         f'<link rel="canonical" href="{SITE}/{file}">{alternates}'
-        f'<link rel="icon" type="image/png" href="assets/trolley-icon-128.png"><link rel="stylesheet" href="style.css"></head><body>'
+        f'<link rel="icon" type="image/png" href="assets/trolley-icon-128.png"><link rel="stylesheet" href="style.css?v={CSS_VERSION}"></head><body>'
         f'<nav aria-label="{t["nav_label"]}"><a class="brand" href="index.html">MeMe Games / TrolleyDilemma</a>'
         f'<div><a href="index.html#game">{t["nav_game"]}</a><a href="{file}">{t["nav_privacy"]}</a></div></nav>'
         f'<main class="policy"><span class="eyebrow">PRIVACY</span><h1>{t["title"]}</h1>'
