@@ -1,12 +1,26 @@
-# TrolleyDilemma / 모두의 딜레마
+# MeMe Games — memegames.dev
 
-MeMe Games game website and privacy notice.
+MeMe Games website: TrolleyDilemma (모두의 딜레마) game page and privacy policy.
 
-Static GitHub Pages site. Game source and credentials are not included.
+Static GitHub Pages site served from `main` at the root. Game source and credentials are not included.
 
-Website: https://codeonelabs.github.io/
-Privacy: https://codeonelabs.github.io/privacy.html (English, default)
+Website: https://memegames.dev/
+Privacy: https://memegames.dev/privacy.html (English, default)
 Translations: privacy-ko.html, privacy-ja.html, privacy-zh.html, privacy-fr.html
-Edit the policy text in tools/build_privacy.py, then run `python3 tools/build_privacy.py` to regenerate all languages.
+Old address: https://codeonelabs.github.io/ redirects here, so links already handed out (App Store, Google Play, Steam) keep working. Keep this repository's name as it is, or the redirect stops.
 Contact: codeone.unity@gmail.com
 Icon: assets/trolley-icon-128.png (128 x 128 PNG)
+
+## Editing
+
+- Privacy policy: edit the text in tools/build_privacy.py, then run `python3 tools/build_privacy.py` to regenerate all languages. Do not hand-edit privacy*.html.
+- Home page: index.html. 404.html, robots.txt and sitemap.xml are hand-written; add a line to sitemap.xml for each new page.
+- After changing style.css, bump CSS_VERSION in tools/build_privacy.py and the `?v=` in index.html and 404.html, then regenerate.
+
+## Domain
+
+- memegames.dev is registered at Namecheap. DNS (Advanced DNS):
+  - A `@` → 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153
+  - AAAA `@` → 2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153
+  - CNAME `www` → codeonelabs.github.io.
+- The CNAME file in this repository sets the custom domain for GitHub Pages. .dev only works over HTTPS, so keep "Enforce HTTPS" on.

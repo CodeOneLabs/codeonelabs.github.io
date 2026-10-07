@@ -6,7 +6,7 @@ Every language must keep the same sections so the translations stay in sync.
 """
 from pathlib import Path
 
-SITE = "https://codeonelabs.github.io"
+SITE = "https://memegames.dev"
 EMAIL = "codeone.unity@gmail.com"
 MAIL = f'<a href="mailto:{EMAIL}">{EMAIL}</a>'
 # Bump when style.css changes so browsers drop the cached copy.
