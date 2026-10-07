@@ -1,6 +1,6 @@
-# CodeOneLabs — memegames.dev
+# MeMe Games — memegames.dev
 
-Minimal project universe for CodeOneLabs. Project names link directly to their destinations. OneText and Trolley are the two largest planets; the original TrolleyDilemma page remains at `trolley.html`.
+Minimal project universe for MeMe Games (GitHub: CodeOneLabs). Project names link directly to their destinations. OneText and Trolley are the two largest planets; the original TrolleyDilemma page remains at `trolley.html`.
 
 Static GitHub Pages site served from `main` at the root. Game source and credentials are not included.
 
