@@ -1,6 +1,6 @@
-# MeMe Games — memegames.dev
+# CodeOneLabs — memegames.dev
 
-MeMe Games website: TrolleyDilemma (모두의 딜레마) game page and privacy policy.
+Minimal project universe for CodeOneLabs. Project names link directly to their destinations. OneText and Trolley are the two largest planets; the original TrolleyDilemma page remains at `trolley.html`.
 
 Static GitHub Pages site served from `main` at the root. Game source and credentials are not included.
 
@@ -14,8 +14,10 @@ Icon: assets/trolley-icon-128.png (128 x 128 PNG)
 ## Editing
 
 - Privacy policy: edit the text in tools/build_privacy.py, then run `python3 tools/build_privacy.py` to regenerate all languages. Do not hand-edit privacy*.html.
-- Home page: index.html. 404.html, robots.txt and sitemap.xml are hand-written; add a line to sitemap.xml for each new page.
-- After changing style.css, bump CSS_VERSION in tools/build_privacy.py and the `?v=` in index.html and 404.html, then regenerate.
+- Home page: `index.html` includes the map CSS, stars, drag/zoom controls, and direct project links. Edit each `.planet-node` anchor to change its name, destination or desktop/mobile position. No build step or external library is required.
+- Trolley page: `trolley.html`. Shared privacy styles are still in `style.css`.
+- `404.html`, `robots.txt` and `sitemap.xml` are hand-written; add a line to sitemap.xml for each new page.
+- After changing style.css, bump CSS_VERSION in tools/build_privacy.py and the `?v=` in trolley.html and 404.html, then regenerate.
 
 ## Domain
 
