@@ -8,7 +8,7 @@ Website: https://memegames.dev/
 Privacy: https://memegames.dev/privacy.html (English, default)
 Translations: privacy-ko.html, privacy-ja.html, privacy-zh.html, privacy-fr.html
 Old address: https://codeonelabs.github.io/ redirects here, so links already handed out (App Store, Google Play, Steam) keep working. Keep this repository's name as it is, or the redirect stops.
-Contact: codeone.unity@gmail.com
+Contact: contact@memegames.dev (Namecheap email forwarding)
 Icon: assets/trolley-icon-128.png (128 x 128 PNG)
 
 ## Editing

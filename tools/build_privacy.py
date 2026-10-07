@@ -7,7 +7,7 @@ Every language must keep the same sections so the translations stay in sync.
 from pathlib import Path
 
 SITE = "https://memegames.dev"
-EMAIL = "codeone.unity@gmail.com"
+EMAIL = "contact@memegames.dev"
 MAIL = f'<a href="mailto:{EMAIL}">{EMAIL}</a>'
 # Bump when style.css changes so browsers drop the cached copy.
 CSS_VERSION = "20261005c"
