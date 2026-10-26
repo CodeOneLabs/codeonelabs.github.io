@@ -7,6 +7,7 @@ Static GitHub Pages site served from `main` at the root. Game source and credent
 Website: https://memegames.dev/
 Privacy: https://memegames.dev/privacy.html (English, default)
 Translations: privacy-ko.html, privacy-ja.html, privacy-zh.html, privacy-fr.html
+BeatBound privacy: https://memegames.dev/beatbound/privacy.html (English, default), beatbound/privacy-ko.html
 Old address: https://codeonelabs.github.io/ redirects here, so links already handed out (App Store, Google Play, Steam) keep working. Keep this repository's name as it is, or the redirect stops.
 Contact: contact@memegames.dev (Namecheap email forwarding)
 Icon: assets/trolley-icon-128.png (128 x 128 PNG)
@@ -14,6 +15,7 @@ Icon: assets/trolley-icon-128.png (128 x 128 PNG)
 ## Editing
 
 - Privacy policy: edit the text in tools/build_privacy.py, then run `python3 tools/build_privacy.py` to regenerate all languages. Do not hand-edit privacy*.html.
+- BeatBound privacy policy: edit tools/build_beatbound_privacy.py, then run `python3 tools/build_beatbound_privacy.py`. Do not hand-edit beatbound/privacy*.html.
 - Home page: `index.html` includes the map CSS, stars, drag/zoom controls, and direct project links. Edit each `.planet-node` anchor to change its name, destination or desktop/mobile position. No build step or external library is required.
 - About page: `about.html` contains the studio introduction, project platforms and public contact information. OneText links to `/OneText`, served by the existing OneText project Pages site.
 - Trolley page: `trolley.html`. Shared privacy styles are still in `style.css`.
