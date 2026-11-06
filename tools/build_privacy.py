@@ -19,6 +19,8 @@ LINKS = {
     "unity": "https://unity.com/legal/privacy-policy",
     "steam": "https://store.steampowered.com/privacy_agreement/",
     "github": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
+    "unity_ads": "https://unity.com/legal/game-player-and-app-user-privacy-policy",
+    "google": "https://policies.google.com/privacy",
 }
 
 # (code, file, native name)
@@ -53,7 +55,7 @@ TEXT["en"] = dict(
     lang_label="Language",
     body=f"""
 <p>MeMe Games ("we", "us") makes Everyone's Dilemma (TrolleyDilemma). This policy explains what information we process when you play the game on any platform and when you visit this website, why we process it, and the choices you have.</p>
-<p class="small">Effective date: October 5, 2026 · Controller: MeMe Games · Contact: {MAIL}</p>
+<p class="small">Effective date: November 6, 2026 · Controller: MeMe Games · Contact: {MAIL}</p>
 
 <h2>1. Information we process and why</h2>
 {table(["Feature", "Information", "Purpose"], [
@@ -64,6 +66,8 @@ TEXT["en"] = dict(
     ["Saving and sync", "Nickname, match time, mode, player count, online or offline, score, day reached, win or loss, team, MVP, winner, cumulative records, achievements and equipped cosmetics", "Save your play records and sync them to EOS cloud storage"],
     ["Steam features", "Steam account identifier, unlocked achievements, the room code in invitations you send", "Steam achievements and friend invitations (Steam version only)"],
     ["Crash and error reports", "Error message and stack trace, recent log lines, game version, platform, operating system, device model and hardware details, time of the error, an anonymous device identifier assigned by Unity", "Find and fix crashes and errors"],
+    ["Advertising (Android and iOS only)", "Advertising identifier (where you allow it), IP address, device and app information, ad impressions and clicks", "Show ads, measure ad performance and prevent ad fraud"],
+    ["Remove Ads purchase (Android and iOS only)", "Purchase status and order information from Google Play or the App Store", "Turn off ads and restore your purchase after reinstalling"],
     ["Inquiries", "Your email address and anything you include in your message", "Answer your inquiry"],
 ])}
 
@@ -87,17 +91,19 @@ TEXT["en"] = dict(
 <li><strong>Epic Games, Inc.</strong> (Epic Online Services): sign-in, account linking, lobbies and P2P connections, voice chat, cloud storage of play records</li>
 <li><strong>Discord Inc.</strong>: sign-in for the Discord account you choose to link</li>
 <li><strong>Apple Inc.</strong>: Sign in with Apple for the Apple account you choose to link (App Store versions only)</li>
-<li><strong>Unity Technologies</strong> (Unity Cloud Diagnostics): crash and error reports</li>
+<li><strong>Unity Technologies</strong> (Unity Cloud Diagnostics, Unity LevelPlay, Unity Ads, Unity IAP): crash and error reports; ads and in-app purchase processing in the Android and iOS versions</li>
+<li><strong>Google LLC</strong>: Google Play purchases in the Android version</li>
 <li><strong>Valve Corporation</strong> (Steam): achievements and friend invitations in the Steam version</li>
 <li><strong>GitHub, Inc.</strong>: hosting this website</li>
 </ul>
 <p>Apple, Google and Valve handle store purchases, platform accounts and payments under their own policies. We never receive your payment card details.</p>
 <p>During online play, your nickname, gameplay data and the voice you send are shared with the other players in the same session. Depending on how players are connected, technical information such as your IP address may be visible to the relay service or to other players.</p>
-<p>We do not sell your personal information, and we do not share it for targeted advertising.</p>
-{links([("epic", "Epic Games Privacy Policy"), ("discord", "Discord Privacy Policy"), ("unity", "Unity Privacy Policy"), ("steam", "Steam Privacy Policy"), ("github", "GitHub Privacy Statement")])}
+<p>We do not sell your personal information. Apart from the mobile advertising services described in section 6, we do not share it for advertising.</p>
+{links([("epic", "Epic Games Privacy Policy"), ("discord", "Discord Privacy Policy"), ("unity", "Unity Privacy Policy"), ("unity_ads", "Unity Game Player and App User Privacy Policy (LevelPlay, Unity Ads)"), ("google", "Google Privacy Policy"), ("steam", "Steam Privacy Policy"), ("github", "GitHub Privacy Statement")])}
 
 <h2>6. Website, advertising and analytics</h2>
-<p>This website is served by GitHub Pages. It has no ads, no analytics scripts and no tracking cookies. GitHub may process access information such as IP addresses to provide and secure its hosting service. The game has no advertising or behavioral analytics SDKs. The only diagnostic data it sends are the crash and error reports described in section 3.</p>
+<p>This website is served by GitHub Pages. It has no ads, no analytics scripts and no tracking cookies. GitHub may process access information such as IP addresses to provide and secure its hosting service. The game has no behavioral analytics SDKs.</p>
+<p><strong>Ads in the Android and iOS versions.</strong> The Android and iOS versions show a full-screen ad after every few finished games. Ads are served through Unity LevelPlay and the Unity Ads network (Unity Technologies). These services may collect the advertising information listed in section 1 under their own privacy policies and, where the law and your choices allow, use it for personalized ads. On iPhone and iPad, the advertising identifier is used only if you allow tracking when the system asks; you can change this at any time in Settings &gt; Privacy &amp; Security &gt; Tracking. On Android, you can reset or delete your advertising ID or opt out of personalized ads in your device settings. Buying "Remove Ads" turns off ads in the game; Google or Apple processes the payment and we never receive your card details. The PC, Mac and Steam versions have no ads.</p>
 
 <h2>7. Your rights and choices</h2>
 <p>You can ask us to access, correct, delete or export your information, to unlink an external account from your game data, or to restrict or object to processing. Send requests to {MAIL}. To help us find your records, include your in-game nickname, the platform you play on and the type of any linked account. We may ask for more information to confirm the request comes from you. Never send passwords, verification codes or access tokens.</p>
@@ -112,7 +118,8 @@ TEXT["en"] = dict(
     ["Epic Games, Inc.", "United States and other EOS regions", "Identifiers, nickname, gameplay and play records, voice in transit, network information", "Online services, voice chat, cloud saves", "Until you ask us to delete it, or as set out in Epic's policy"],
     ["Discord Inc.", "United States", "Discord account identifier, basic profile", "Account linking", "As set out in Discord's policy"],
     ["Apple Inc.", "United States", "Apple account identifier created for this developer", "Account linking (Sign in with Apple)", "As set out in Apple's policy"],
-    ["Unity Technologies SF", "United States", "Crash and error reports", "Crash diagnosis", "Within Unity's retention period"],
+    ["Unity Technologies SF", "United States", "Crash and error reports; advertising identifier, IP address, device and ad information (Android and iOS); purchase status", "Crash diagnosis, ads, in-app purchases", "As set out in Unity's policy"],
+    ["Google LLC", "United States", "Purchase information", "In-app purchases (Android)", "As set out in Google's policy"],
     ["Valve Corporation", "United States", "Steam account identifier, achievements, invitation room code", "Steam features", "As set out in Valve's policy"],
     ["GitHub, Inc.", "United States", "Website access information", "Website hosting", "As set out in GitHub's policy"],
 ], wide=True)}
@@ -122,14 +129,14 @@ TEXT["en"] = dict(
 <p>Under the GDPR and UK GDPR, MeMe Games is the controller of your information. We rely on these legal bases:</p>
 <ul>
 <li><strong>Performance of a contract</strong>: sign-in, online play, voice chat, saving and syncing records</li>
-<li><strong>Consent</strong>: linking an Epic, Discord or Apple account. You can withdraw consent at any time by unlinking or by contacting us.</li>
-<li><strong>Legitimate interests</strong>: crash and error reports, security and abuse prevention, website hosting, to keep the game stable and safe. You can object at any time.</li>
+<li><strong>Consent</strong>: linking an Epic, Discord or Apple account, and personalized ads and use of the advertising identifier on mobile. You can withdraw consent at any time by unlinking, by changing your device's ad settings or by contacting us.</li>
+<li><strong>Legitimate interests</strong>: crash and error reports, security and abuse prevention, website hosting, to keep the game stable and safe, and non-personalized ads that keep the mobile versions free. You can object at any time.</li>
 <li><strong>Legal obligation</strong>: when the law requires us to keep or disclose information</li>
 </ul>
 <p>You also have the right to data portability and the right to lodge a complaint with your local data protection authority. We do not make decisions based solely on automated processing that have legal or similarly significant effects on you.</p>
 
 <h3>8.3 California and other U.S. states</h3>
-<p>We do not sell or share personal information as those terms are defined in the CCPA/CPRA, and we do not use sensitive personal information to infer characteristics about you. In the past 12 months we collected these categories: identifiers (account IDs, device identifiers, IP addresses), internet or other network activity (gameplay and connection data, crash reports) and audio information (voice sent in voice chat, which is not recorded). You can ask to know, correct or delete your information, directly or through an authorized agent. We will not discriminate against you for exercising these rights.</p>
+<p>We do not sell personal information. Identifiers received by the mobile advertising services may count as "sharing" for cross-context behavioral advertising under the CCPA/CPRA; you can opt out with your device's ad tracking settings described in section 6. We do not use sensitive personal information to infer characteristics about you. In the past 12 months we collected these categories: identifiers (account IDs, device identifiers, advertising identifiers, IP addresses), internet or other network activity (gameplay and connection data, ad interactions, crash reports) and audio information (voice sent in voice chat, which is not recorded). You can ask to know, correct or delete your information, directly or through an authorized agent. We will not discriminate against you for exercising these rights.</p>
 
 <h3>8.4 Republic of Korea</h3>
 <p>Privacy officer: MeMe Games, {MAIL}. For help with a privacy violation, you can also contact the Personal Information Infringement Report Center (privacy.kisa.or.kr, 118) or the Personal Information Dispute Mediation Committee (www.kopico.go.kr, 1833-6972).</p>
@@ -158,7 +165,7 @@ TEXT["ko"] = dict(
     lang_label="언어",
     body=f"""
 <p>MeMe Games(이하 "회사")는 모두의 딜레마(TrolleyDilemma)를 만듭니다. 이 방침은 모든 플랫폼에서 게임을 플레이하거나 이 웹사이트를 방문할 때 회사가 어떤 정보를 왜 처리하는지, 이용자가 어떤 선택을 할 수 있는지 설명합니다.</p>
-<p class="small">시행일: 2026년 10월 5일 · 개인정보처리자: MeMe Games · 문의: {MAIL}</p>
+<p class="small">시행일: 2026년 11월 6일 · 개인정보처리자: MeMe Games · 문의: {MAIL}</p>
 
 <h2>1. 처리하는 정보와 목적</h2>
 {table(["기능", "정보", "목적"], [
@@ -169,6 +176,8 @@ TEXT["ko"] = dict(
     ["저장 및 동기화", "닉네임, 경기 시각·모드·플레이어 수·온라인 여부·점수·진행 일차·승패·진영·MVP·승자, 누적 기록, 업적과 착용한 꾸미기 아이템", "플레이 기록 저장 및 EOS 클라우드 동기화"],
     ["Steam 기능", "Steam 계정 식별자, 달성한 업적, 보낸 초대에 담긴 방 코드", "Steam 업적과 친구 초대(Steam 버전만 해당)"],
     ["크래시·오류 보고", "오류 메시지와 스택 트레이스, 최근 로그 몇 줄, 게임 버전, 플랫폼, 운영체제, 기기 모델과 하드웨어 정보, 오류 발생 시각, Unity가 부여하는 익명 기기 식별자", "충돌과 오류의 원인 파악 및 수정"],
+    ["광고(Android·iOS만)", "광고 식별자(허용한 경우), IP 주소, 기기·앱 정보, 광고 노출·클릭", "광고 표시, 광고 성과 측정, 광고 사기 방지"],
+    ["광고 제거 구매(Android·iOS만)", "Google Play·App Store의 구매 상태와 주문 정보", "광고 끄기, 재설치 시 구매 복원"],
     ["문의", "이메일 주소와 문의에 적은 내용", "문의 확인과 답변"],
 ])}
 
@@ -192,17 +201,19 @@ TEXT["ko"] = dict(
 <li><strong>Epic Games, Inc.</strong>(Epic Online Services): 로그인, 계정 연결, 로비·P2P 연결, 음성 채팅, 플레이 기록 클라우드 저장</li>
 <li><strong>Discord Inc.</strong>: 이용자가 연결한 Discord 계정의 로그인</li>
 <li><strong>Apple Inc.</strong>: 이용자가 연결한 Apple 계정의 Apple로 로그인(App Store 버전만 해당)</li>
-<li><strong>Unity Technologies</strong>(Unity Cloud Diagnostics): 크래시·오류 보고</li>
+<li><strong>Unity Technologies</strong>(Unity Cloud Diagnostics, Unity LevelPlay, Unity Ads, Unity IAP): 크래시·오류 보고, Android·iOS 버전의 광고와 인앱 결제 처리</li>
+<li><strong>Google LLC</strong>: Android 버전의 Google Play 결제</li>
 <li><strong>Valve Corporation</strong>(Steam): Steam 버전의 업적과 친구 초대</li>
 <li><strong>GitHub, Inc.</strong>: 이 웹사이트 호스팅</li>
 </ul>
 <p>스토어 구매, 플랫폼 계정, 결제는 Apple, Google, Valve가 각자의 정책에 따라 처리합니다. 회사는 결제 카드 정보를 받지 않습니다.</p>
 <p>온라인 플레이 중에는 닉네임, 게임 진행 정보, 이용자가 전송한 음성이 같은 세션의 다른 플레이어에게 전달됩니다. 연결 방식에 따라 IP 주소 같은 기술 정보가 중계 서비스나 다른 플레이어에게 보일 수 있습니다.</p>
-<p>회사는 개인정보를 판매하지 않으며 맞춤형 광고를 위해 공유하지 않습니다.</p>
-{links([("epic", "Epic Games 개인정보처리방침"), ("discord", "Discord 개인정보처리방침"), ("unity", "Unity 개인정보처리방침"), ("steam", "Steam 개인정보처리방침"), ("github", "GitHub 개인정보처리방침")])}
+<p>회사는 개인정보를 판매하지 않으며, 6항의 모바일 광고 서비스를 빼면 광고 목적으로 제공하지 않습니다.</p>
+{links([("epic", "Epic Games 개인정보처리방침"), ("discord", "Discord 개인정보처리방침"), ("unity", "Unity 개인정보처리방침"), ("unity_ads", "Unity 게임 플레이어·앱 이용자 개인정보처리방침(LevelPlay, Unity Ads)"), ("google", "Google 개인정보처리방침"), ("steam", "Steam 개인정보처리방침"), ("github", "GitHub 개인정보처리방침")])}
 
 <h2>6. 웹사이트와 광고·분석</h2>
-<p>이 웹사이트는 GitHub Pages로 제공됩니다. 광고, 방문 분석 스크립트, 추적 쿠키가 없습니다. GitHub는 호스팅 서비스를 제공하고 보호하기 위해 IP 주소 등 접속 정보를 처리할 수 있습니다. 게임에는 광고나 행동 분석 SDK가 없으며, 게임이 보내는 진단 정보는 3항의 크래시·오류 보고뿐입니다.</p>
+<p>이 웹사이트는 GitHub Pages로 제공됩니다. 광고, 방문 분석 스크립트, 추적 쿠키가 없습니다. GitHub는 호스팅 서비스를 제공하고 보호하기 위해 IP 주소 등 접속 정보를 처리할 수 있습니다. 게임에는 행동 분석 SDK가 없습니다.</p>
+<p><strong>Android·iOS 버전의 광고.</strong> Android와 iOS 버전은 몇 판이 끝날 때마다 전면 광고를 보여 줍니다. 광고는 Unity Technologies의 Unity LevelPlay와 Unity Ads 네트워크로 제공됩니다. 이 서비스들은 1항의 광고 정보를 각자의 개인정보처리방침에 따라 수집할 수 있고, 법과 이용자의 선택이 허용하는 범위에서 맞춤형 광고에 쓸 수 있습니다. iPhone·iPad에서는 시스템이 물을 때 추적을 허용한 경우에만 광고 식별자를 쓰며, 설정 &gt; 개인정보 보호 및 보안 &gt; 추적에서 언제든 바꿀 수 있습니다. Android에서는 기기 설정에서 광고 ID를 재설정·삭제하거나 맞춤 광고를 끌 수 있습니다. "광고 제거"를 구매하면 게임 안 광고가 꺼집니다. 결제는 Google 또는 Apple이 처리하며, 회사는 카드 정보를 받지 않습니다. PC, Mac, Steam 버전에는 광고가 없습니다.</p>
 
 <h2>7. 이용자의 권리와 선택</h2>
 <p>이용자는 자신의 정보에 대한 열람, 정정, 삭제, 이동(내보내기), 외부 계정 연결 해제, 처리 정지 및 처리 반대를 요청할 수 있습니다. 요청은 {MAIL}로 보내 주세요. 기록을 찾을 수 있도록 게임 닉네임, 플레이하는 플랫폼, 연결한 계정 종류를 함께 적어 주시면 됩니다. 본인 확인을 위해 추가 정보를 요청할 수 있습니다. 비밀번호, 인증 코드, 접근 토큰은 절대 보내지 마세요.</p>
@@ -217,7 +228,8 @@ TEXT["ko"] = dict(
     ["Epic Games, Inc.", "미국 및 기타 EOS 지역", "식별자, 닉네임, 게임 진행·플레이 기록, 전송 중인 음성, 네트워크 정보", "온라인 서비스, 음성 채팅, 클라우드 저장", "삭제 요청 시까지 또는 Epic 정책에 따름"],
     ["Discord Inc.", "미국", "Discord 계정 식별자, 기본 프로필", "계정 연결", "Discord 정책에 따름"],
     ["Apple Inc.", "미국", "이 개발자용으로 만들어진 Apple 계정 식별자", "계정 연결(Apple로 로그인)", "Apple 정책에 따름"],
-    ["Unity Technologies SF", "미국", "크래시·오류 보고", "크래시 진단", "Unity 보관 기간 이내"],
+    ["Unity Technologies SF", "미국", "크래시·오류 보고, 광고 식별자·IP 주소·기기·광고 정보(Android·iOS), 구매 상태", "크래시 진단, 광고, 인앱 결제", "Unity 정책에 따름"],
+    ["Google LLC", "미국", "구매 정보", "인앱 결제(Android)", "Google 정책에 따름"],
     ["Valve Corporation", "미국", "Steam 계정 식별자, 업적, 초대 방 코드", "Steam 기능", "Valve 정책에 따름"],
     ["GitHub, Inc.", "미국", "웹사이트 접속 정보", "웹사이트 호스팅", "GitHub 정책에 따름"],
 ], wide=True)}
@@ -227,14 +239,14 @@ TEXT["ko"] = dict(
 <p>GDPR 및 UK GDPR에 따라 회사는 이용자 정보의 컨트롤러입니다. 회사는 다음 법적 근거에 따라 처리합니다.</p>
 <ul>
 <li><strong>계약 이행</strong>: 로그인, 온라인 플레이, 음성 채팅, 기록 저장과 동기화</li>
-<li><strong>동의</strong>: Epic·Discord·Apple 계정 연결. 연결을 해제하거나 회사에 요청해 언제든 동의를 철회할 수 있습니다.</li>
-<li><strong>정당한 이익</strong>: 게임을 안정적이고 안전하게 유지하기 위한 크래시·오류 보고, 보안과 부정 이용 방지, 웹사이트 호스팅. 언제든 반대할 수 있습니다.</li>
+<li><strong>동의</strong>: Epic·Discord·Apple 계정 연결, 모바일의 맞춤형 광고와 광고 식별자 사용. 연결 해제, 기기 광고 설정 변경 또는 회사 요청으로 언제든 동의를 철회할 수 있습니다.</li>
+<li><strong>정당한 이익</strong>: 게임을 안정적이고 안전하게 유지하기 위한 크래시·오류 보고, 보안과 부정 이용 방지, 웹사이트 호스팅, 무료 모바일 버전을 위한 비맞춤형 광고. 언제든 반대할 수 있습니다.</li>
 <li><strong>법적 의무</strong>: 법령에 따라 정보를 보관하거나 제공해야 하는 경우</li>
 </ul>
 <p>이용자는 데이터 이동권과 거주 국가 개인정보 감독기관에 민원을 제기할 권리가 있습니다. 회사는 이용자에게 법적 효과나 그와 비슷한 중대한 영향을 주는 자동화된 결정만으로 판단하지 않습니다.</p>
 
 <h3>8.3 미국 캘리포니아 및 기타 주</h3>
-<p>회사는 CCPA/CPRA에서 정의하는 개인정보 판매(sell)나 공유(share)를 하지 않으며, 민감한 개인정보로 이용자의 특성을 추론하지 않습니다. 지난 12개월 동안 수집한 범주는 식별자(계정 ID, 기기 식별자, IP 주소), 인터넷·네트워크 활동(게임 진행·연결 정보, 크래시 보고), 음성 정보(음성 채팅으로 전송되며 녹음하지 않음)입니다. 이용자는 직접 또는 대리인을 통해 열람, 정정, 삭제를 요청할 수 있으며, 권리 행사를 이유로 차별받지 않습니다.</p>
+<p>회사는 개인정보를 판매(sell)하지 않습니다. 모바일 광고 서비스가 받는 식별자는 CCPA/CPRA의 교차 맥락 행동 광고를 위한 "공유(share)"에 해당할 수 있으며, 6항의 기기 광고 추적 설정으로 거부할 수 있습니다. 민감한 개인정보로 이용자의 특성을 추론하지 않습니다. 지난 12개월 동안 수집한 범주는 식별자(계정 ID, 기기 식별자, 광고 식별자, IP 주소), 인터넷·네트워크 활동(게임 진행·연결 정보, 광고 반응, 크래시 보고), 음성 정보(음성 채팅으로 전송되며 녹음하지 않음)입니다. 이용자는 직접 또는 대리인을 통해 열람, 정정, 삭제를 요청할 수 있으며, 권리 행사를 이유로 차별받지 않습니다.</p>
 
 <h3>8.4 대한민국</h3>
 <p>개인정보 보호책임자: MeMe Games, {MAIL}. 개인정보 침해에 대한 상담이나 구제가 필요하면 개인정보침해 신고센터(privacy.kisa.or.kr, 국번 없이 118)나 개인정보 분쟁조정위원회(www.kopico.go.kr, 1833-6972)에도 문의할 수 있습니다.</p>
