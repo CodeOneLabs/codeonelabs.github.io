@@ -149,8 +149,12 @@ def load_cities():
         t = (GD / "Themes" / f"{name}.asset").read_text(encoding="utf-8")
         acc = re.search(r"accent: \{r: ([\d.]+), g: ([\d.]+), b: ([\d.]+)", t)
         color = "#%02x%02x%02x" % tuple(int(float(x) * 255 + .5) for x in acc.groups())
+        def col(field):
+            m = re.search(rf"{field}: \{{r: ([\d.]+), g: ([\d.]+), b: ([\d.]+)", t)
+            return "#%02x%02x%02x" % tuple(int(float(x) * 255 + .5) for x in m.groups())
         cities[num] = dict(num=num, name=yaml_field(t, "displayName"), tagline=yaml_field(t, "tagline") or "",
-                           color=color, slug=name.lower(), dlc=num in DLC_CITIES)
+                           color=color, accent2=col("accent2"), blast=col("blast"), player=col("player"),
+                           slug=name.lower(), dlc=num in DLC_CITIES)
     return cities
 
 
@@ -209,11 +213,17 @@ def chart_stats(chart):
     per_bar = [0] * bars
     cells_total = 0
     hole_ticks = aim_ticks = off_ticks = 0
-    for tick, hs in ticks.items():
+    enc = []
+    for tick, hs in sorted(ticks.items()):
         mask = 0
         hole = 0
         aim = 0
+        aim_kind = hole_dx = hole_dy = 0
         for h in hs:
+            if h.get("aim", 0) and not aim_kind:
+                aim_kind = h["aim"]
+            if h.get("holeSize", 0) > 0 and not hole:
+                hole_dx, hole_dy = h.get("holeDx", 0), h.get("holeDy", 0)
             mask |= int(h.get("cells", "0") or "0", 16)
             if h.get("holeSize", 0) > 0:
                 hole = max(hole, h["holeSize"])
@@ -227,6 +237,10 @@ def chart_stats(chart):
             if aim:
                 aim_ticks += 1
         cells_total += n
+        row = [round(tick_time(tick) * 1000), format(mask, "x")]
+        if aim_kind or hole:
+            row += [aim_kind, hole, hole_dx, hole_dy]
+        enc.append(row)
         for c in range(64):
             if mask >> c & 1:
                 heat[c] += 1
@@ -247,7 +261,8 @@ def chart_stats(chart):
         sec = sum(bar_sec[i:i + 4]) or 1
         if n / sec > best[1]:
             best = (i, n / sec)
-    return dict(blasts=count, nps=count / play, cells=cells_total / max(1, count), sixteenth=off_ticks / max(1, count),
+    return dict(enc=enc, bar_starts=[round((bt[i] if mapped else first + i * 8 * step) * 1000) for i in range(bars + 1)],
+                blasts=count, nps=count / play, cells=cells_total / max(1, count), sixteenth=off_ticks / max(1, count),
                 hole=hole_ticks / max(1, count), aim=aim_ticks / max(1, count), heat=heat, per_bar=per_bar,
                 bar_sec=bar_sec, peak_bar=best[0], peak_nps=best[1], end=end, first=first, start=start,
                 lead=chart.get("leadSteps", 4), step=step, groups=chart.get("groups", []), bars=bars)
@@ -284,6 +299,8 @@ def load_songs(cities, levels):
         song["genre"] = a.get("grooveType") or ""
         i = ident.get(sid, {})
         song["basis"] = SOUND_KO.get(sid, "")
+        song["basis_en"] = i.get("soundBasis", "") if sid in SOUND_KO else ""
+        song["motif_en"] = i.get("motif", "")
         song["motif"] = MOTIF_KO.get(i.get("motif", ""), i.get("motif", ""))
         song["parts"] = parts.get(sid, [])
         song["fever"] = fever.get(sid, [])
@@ -311,87 +328,242 @@ def load_songs(cities, levels):
     return songs
 
 
+# ---------------------------------------------------------------- language
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beatbound_wiki_text import TEXT  # noqa: E402
+
+LANG = "ko"
+LANGS = ("ko", "en")
+
+
+def t(key, **kw):
+    s = TEXT[key][LANG]
+    return s.format(**kw) if kw else s
+
+
+def L(ko, en):
+    return ko if LANG == "ko" else en
+
+
 # ---------------------------------------------------------------- rendering helpers
-CSS = """
-:root{color-scheme:dark;--bg:#0c0b12;--face:#16141f;--face2:#1d1a29;--line:#2c2840;--ink:#f3ecdc;--muted:#a49cb8;--dim:#6f6886;
---accent:#ff5cc0;--sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Segoe UI",sans-serif;
+CSS = r"""
+:root{color-scheme:dark;--bg:#0b0a11;--face:#15131e;--face2:#1c1928;--line:#2b2740;--ink:#f3ecdc;--muted:#a49cb8;--dim:#6f6886;
+--accent:#ff5cc0;--blast:#ffe047;--player:#00f0ff;--sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Segoe UI",sans-serif;
 --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--sans)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--sans);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:
+radial-gradient(900px 500px at 85% -10%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%),
+radial-gradient(700px 400px at -10% 30%,#3b2a8a22,transparent 70%)}
 a{color:inherit;text-decoration-color:#ffffff40;text-underline-offset:3px}a:hover{text-decoration-color:currentColor}
-.top{position:sticky;top:0;z-index:5;background:#0c0b12ee;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-.top .in{max-width:1080px;margin:0 auto;padding:0 16px;height:54px;display:flex;align-items:center;gap:18px;overflow-x:auto;white-space:nowrap}
-.brand{font-weight:800;letter-spacing:.08em;text-decoration:none;font-size:14px}.brand b{color:var(--accent)}
-.top nav{display:flex;gap:4px;margin-left:auto}.top nav a{text-decoration:none;color:var(--muted);font-size:14px;padding:6px 10px;border-radius:8px}
-.top nav a:hover,.top nav a.on{color:var(--ink);background:var(--face2)}
-main{max-width:1080px;margin:0 auto;padding:28px 16px 64px}
-h1{font-size:30px;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}h2{font-size:20px;margin:40px 0 12px;padding-top:4px}
+.top{position:sticky;top:0;z-index:5;background:#0b0a11e6;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1100px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:14px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.08em;text-decoration:none;font-size:14px}.brand b{color:var(--accent)}
+.logo{display:grid;grid-template-columns:repeat(3,6px);gap:2px}.logo i{width:6px;height:6px;border-radius:1.5px;background:#2e2944}
+.logo i.on{background:var(--accent);box-shadow:0 0 6px var(--accent)}.brand:hover .logo i{animation:pop .5s calc(var(--d)*60ms) both}
+.top nav{display:flex;gap:2px;margin-left:auto}.top nav a{text-decoration:none;color:var(--muted);font-size:14px;padding:6px 10px;border-radius:8px}
+.top nav a:hover,.top nav a.on{color:var(--ink);background:var(--face2)}.top nav a.lang{border:1px solid var(--line);margin-left:6px;font:700 12px var(--mono)}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 64px}
+h1{font-size:32px;line-height:1.15;margin:4px 0 8px;letter-spacing:-.01em}h2{font-size:20px;margin:44px 0 12px}
 h3{font-size:16px;margin:24px 0 8px}p{margin:8px 0}.lead{color:var(--muted);max-width:720px}
-.eyebrow{font:700 12px var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.eyebrow{font:700 12px var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:0}
 .card{background:var(--face);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
-.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.tw{overflow-x:auto;margin:10px 0;border:1px solid var(--line);border-radius:12px}
+.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.tw{overflow-x:auto;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--face)}
 table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-th{font-weight:600;color:var(--muted);background:var(--face);font-size:12.5px;position:sticky;top:0}
+th{font-weight:600;color:var(--muted);background:var(--face2);font-size:12.5px}
 tbody tr:last-child td{border-bottom:0}td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
-tbody tr:hover{background:#ffffff06}
+tbody tr{transition:background .2s}tbody tr:hover{background:#ffffff08}
 .chip{display:inline-block;font:700 11px/1 var(--mono);letter-spacing:.06em;padding:5px 7px 4px;border-radius:6px;border:1px solid currentColor;vertical-align:middle;white-space:nowrap}
-.lv{display:inline-block;min-width:28px;text-align:center;font:700 13px/1 var(--mono);padding:5px 6px 4px;border-radius:6px;background:var(--face2);border:1px solid currentColor}
+.lv{display:inline-block;min-width:28px;text-align:center;font:700 13px/1 var(--mono);padding:5px 6px 4px;border-radius:6px;background:var(--face2);border:1px solid currentColor;transition:transform .2s,box-shadow .2s}
+.lv:hover,tr:hover .lv{box-shadow:0 0 10px currentColor}.lv:hover{transform:translateY(-2px)}
 .mut{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:13px}.mono{font-family:var(--mono)}
 .kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0}.kv dt{color:var(--muted)}.kv dd{margin:0}
-.hero{display:flex;gap:22px;align-items:center;flex-wrap:wrap}.led{flex:none;display:grid;grid-template-columns:repeat(8,1fr);gap:3px;width:136px;height:136px;padding:8px;background:#07060b;border-radius:12px;border:1px solid var(--line)}
-.led i{border-radius:3px;background:#1a1726}
-.filters{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}.filters button{font:600 12.5px var(--sans);color:var(--muted);background:var(--face);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
-.filters button.on{color:var(--ink);border-color:var(--ink)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}.filters button{font:600 12.5px var(--sans);color:var(--muted);background:var(--face);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .2s}
+.filters button:hover{color:var(--ink)}.filters button.on{color:var(--c,var(--ink));border-color:var(--c,var(--ink));box-shadow:0 0 12px color-mix(in srgb,var(--c,#fff) 35%,transparent)}
 input.search{width:100%;max-width:320px;font:15px var(--sans);color:var(--ink);background:var(--face);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
 th.sort{cursor:pointer;user-select:none}th.sort:after{content:" ↕";color:var(--dim)}
 .formula{font:14px/1.7 var(--mono);background:#07060b;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;white-space:pre}
-.bars{display:flex;align-items:flex-end;gap:1px;height:56px;margin:6px 0 2px}.bars i{flex:1;min-width:1px;border-radius:1px 1px 0 0}
-.heat{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:112px;height:112px}.heat i{border-radius:2px}
-.tier-cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.bars{display:flex;align-items:flex-end;gap:1px;height:56px;margin:6px 0 2px}.bars i{flex:1;min-width:1px;border-radius:1px 1px 0 0;transform-origin:bottom;animation:grow .7s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i)*6ms)}
+.heat{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:112px;height:112px;flex:none}.heat i{border-radius:2px;transition:transform .15s}.heat i:hover{transform:scale(1.35);position:relative;z-index:1}
+.tier-cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.tc{transition:border-color .2s,transform .2s}.tc:hover{border-color:var(--tc);transform:translateY(-2px)}
 .tc h3{margin:0 0 8px;display:flex;align-items:center;gap:8px}.tc .big{font:800 26px/1 var(--mono)}
-.note{border-left:3px solid var(--line);padding:2px 0 2px 12px;color:var(--muted)}
+.tc .go{margin-left:auto;font:700 11px var(--mono);color:var(--tc);background:none;border:1px solid var(--tc);border-radius:6px;padding:4px 7px;cursor:pointer}
+.tc .go:hover{background:var(--tc);color:#000}
 ul.plain{padding-left:18px;margin:6px 0}ul.plain li{margin:3px 0}
-footer{border-top:1px solid var(--line);color:var(--dim);font-size:13px}footer .in{max-width:1080px;margin:0 auto;padding:20px 16px 40px}
-@media(max-width:640px){h1{font-size:24px}.led{width:104px;height:104px;padding:6px;gap:2px}main{padding-top:20px}}
+.parts{list-style:none;padding:0;margin:0}.parts button{all:unset;cursor:pointer;display:flex;gap:10px;width:100%;padding:3px 6px;border-radius:6px;font-size:13px}
+.parts button:hover{background:var(--face2)}.parts button.on{background:color-mix(in srgb,var(--accent) 20%,transparent)}
+.parts .pt{font-family:var(--mono);color:var(--muted);min-width:118px}
+footer{border-top:1px solid var(--line);color:var(--dim);font-size:13px}footer .in{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+
+/* launchpad board */
+.hero{display:grid;grid-template-columns:minmax(0,380px) 1fr;gap:32px;align-items:center}
+.bb{width:100%;max-width:380px}
+.board{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:clamp(3px,1.2vw,6px);padding:clamp(8px,2.6vw,14px);aspect-ratio:1;
+border-radius:18px;background:linear-gradient(160deg,#1a1726,#09080e);border:1px solid #2f2a45;
+box-shadow:0 0 0 5px #0c0b12,0 0 0 6px #2a2540,0 24px 60px #000a,inset 0 1px 0 #ffffff10;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.board.shake{animation:shake .28s}
+.pad{position:relative;border-radius:22%;background:#1d1a2b;box-shadow:inset 0 -2px 0 #0007,inset 0 1px 0 #ffffff12;cursor:pointer;overflow:hidden;
+transition:background .38s ease-out,box-shadow .38s ease-out}
+.pad .l{position:absolute;inset:0;border-radius:inherit;background:var(--accent);opacity:var(--a,0);transition:opacity .5s}
+.pad .w{position:absolute;inset:12%;border-radius:18%;border:2px solid var(--accent);opacity:0;transform:scale(calc(.25 + .75*var(--w,0)))}
+.pad.warn .w{opacity:calc(.35 + .65*var(--w,0))}
+.pad.warn.hot .w{border-color:#fff;background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.pad.boom{background:var(--blast);box-shadow:0 0 18px var(--blast),inset 0 0 0 2px #fff6;transition:none}
+.pad.ring{background:color-mix(in srgb,var(--accent) 70%,#fff);box-shadow:0 0 14px var(--accent);transition:none}
+.pad:hover{background:#262238}
+.bb-ui{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px}
+.bb-ui button,.bb-ui select{font:700 12px var(--mono);letter-spacing:.04em;color:var(--muted);background:var(--face);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
+.bb-ui button:hover{color:var(--ink)}.bb-ui button.on{color:var(--c,var(--ink));border-color:var(--c,var(--ink))}
+.bb-ui .play{color:#000;background:var(--accent);border-color:var(--accent)}.bb-ui .play:hover{color:#000;filter:brightness(1.15)}
+.bb-ui select{max-width:160px}
+.bb-hint{font-size:12.5px;color:var(--dim);margin:8px 0 0}
+.mini{display:inline-grid;grid-template-columns:repeat(8,1fr);gap:1px;width:26px;height:26px;vertical-align:middle;margin-right:10px;padding:2px;border-radius:5px;background:#07060b}
+.mini i{border-radius:1px;background:#1d1a2b}.mini i.on{background:var(--c);opacity:var(--a)}
+tr:hover .mini i.on{animation:twinkle .7s calc(var(--d)*25ms) both}
+.songcell{display:flex;align-items:center}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.5);background:var(--blast)}100%{transform:scale(1)}}
+@keyframes twinkle{0%{opacity:var(--a)}35%{opacity:1;filter:brightness(1.8)}100%{opacity:var(--a)}}
+@keyframes hop{from{transform:scale(.6)}to{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translate(-5px,2px)}50%{transform:translate(4px,-3px)}75%{transform:translate(-3px,1px)}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media(max-width:760px){.hero{grid-template-columns:1fr;gap:20px}.bb{max-width:340px;margin:0 auto}h1{font-size:26px}main{padding-top:20px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 """
 
-NAV = [("index.html", "곡 목록"), ("rating.html", "레이팅"), ("stepup.html", "STEP UP"), ("rules.html", "점수·랭크")]
+JS = r"""
+(()=>{
+const L=window.BBL||{};const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ac=null,soundOn=true;
+function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume();return ac}
+function blip(f,d,type,vol){if(!soundOn)return;const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,a.currentTime);
+o.frequency.exponentialRampToValueAtTime(Math.max(40,f*.45),a.currentTime+d);g.gain.setValueAtTime(vol||.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d)}
+function cellsOf(hex){const out=[];let v=BigInt('0x'+hex);for(let i=0;v>0n;i++,v>>=1n)if(v&1n)out.push(i);return out}
+const AIM={1:(x,y)=>[[x,y]],2:(x,y)=>[...Array(8)].map((_,i)=>[i,y]),3:(x,y)=>[...Array(8)].map((_,i)=>[x,i]),
+4:(x,y)=>[...Array(8)].flatMap((_,i)=>[[i,y],[x,i]]),5:(x,y)=>[-1,0,1].flatMap(a=>[-1,0,1].map(b=>[x+a,y+b])),
+6:(x,y)=>[...Array(15)].flatMap((_,k)=>{const i=k-7;return[[x+i,y+i],[x+i,y-i]]})};
+
+class Board{
+ constructor(root){this.root=root;this.el=root.querySelector('.board');this.pads=[];this.px=3;this.py=4;this.playing=false;this.data=null;
+  const led=(root.dataset.led||'').split(',');
+  for(let i=0;i<64;i++){const p=document.createElement('div');p.className='pad';p.innerHTML='<i class="l"></i><i class="w"></i>';
+   const ch=(led[i>>3]||'')[i&7];const a={'1':.3,'2':.6,'3':1}[ch];if(a)p.style.setProperty('--a',a);p.dataset.i=i;this.el.appendChild(p);this.pads.push(p)}
+  this.el.addEventListener('pointerdown',e=>{const p=e.target.closest('.pad');if(!p)return;e.preventDefault();this.tap(+p.dataset.i)});
+  this.ui=root.querySelector('.bb-ui');this.stat=root.querySelector('.bb-stat');
+  if(this.ui)this.setupUI();
+  if(root.dataset.demo&&!reduce)this.load().then(()=>{this.mode='demo';this.start(0)});
+ }
+ led(on){this.pads.forEach(p=>p.querySelector('.l').style.opacity=on?'':'0')}
+ flash(cells,cls,ms){cells.forEach(i=>{const p=this.pads[i];if(!p)return;p.classList.add(cls);clearTimeout(p._t);p._t=setTimeout(()=>p.classList.remove(cls),ms||70)})}
+ ripple(i){const x=i&7,y=i>>3;const cross=[];for(let k=0;k<8;k++){cross.push(y*8+k,k*8+x)}this.flash(cross,'boom',90);blip(520+x*40,.12,'square',.04);
+  for(let r=1;r<9;r++)setTimeout(()=>{const ring=[];for(let j=0;j<64;j++){const d=Math.max(Math.abs((j&7)-x),Math.abs((j>>3)-y));if(d===r)ring.push(j)}this.flash(ring,'ring',80)},r*45)}
+ tap(i){audio();this.ripple(i)}
+ async load(){if(this.data)return this.data;const r=await fetch(this.root.dataset.src);this.data=await r.json();
+  for(const k in this.data.tiers){this.data.tiers[k].hits.forEach(h=>h.cells=cellsOf(h[1]))}return this.data}
+ setupUI(){const ui=this.ui;this.tier=this.root.dataset.tier||'extreme';
+  ui.querySelectorAll('[data-tier]').forEach(b=>b.onclick=()=>{this.tier=b.dataset.tier;ui.querySelectorAll('[data-tier]').forEach(x=>x.classList.toggle('on',x===b));if(this.playing)this.start(this.fromMs)});
+  this.sel=ui.querySelector('select');
+  ui.querySelector('.play').onclick=()=>{audio();this.playing?this.stop():this.start(this.sel?+this.sel.value:0)};
+  const snd=ui.querySelector('.snd');if(snd)snd.onclick=()=>{soundOn=!soundOn;snd.classList.toggle('on',soundOn)};
+  document.querySelectorAll('[data-seek]').forEach(b=>b.onclick=()=>{if(this.sel)this.sel.value=b.dataset.seek;audio();this.start(+b.dataset.seek);this.root.scrollIntoView({behavior:'smooth',block:'center'})});
+  document.querySelectorAll('[data-playtier]').forEach(b=>b.onclick=()=>{const t=ui.querySelector('[data-tier="'+b.dataset.playtier+'"]');if(t)t.click();audio();this.start(0);this.root.scrollIntoView({behavior:'smooth',block:'center'})});
+ }
+ async start(fromMs){await this.load();this.stop(true);this.fromMs=fromMs||0;const tier=this.data.tiers[this.mode==='demo'?'extreme':this.tier];
+  this.hits=tier.hits;this.lead=tier.lead;this.i=0;while(this.i<this.hits.length&&this.hits[this.i][0]<this.fromMs)this.i++;
+  this.resolved=new Map();this.nHit=0;this.nDodge=0;this.playing=true;if(this.mode!=='demo'){this.mode='play';this.px=3;this.py=4}
+  this.endMs=this.mode==='demo'?this.data.demoEnd:(this.hits.length?this.hits[this.hits.length-1][0]+900:0);
+  this.led(false);this.t0=performance.now()-(this.fromMs-this.lead-300);const pb=this.ui&&this.ui.querySelector('.play');if(pb)pb.textContent=L.stop||'STOP';this.root.classList.add('on');
+  const loop=()=>{if(!this.playing)return;this.frame(performance.now()-this.t0);this.raf=requestAnimationFrame(loop)};loop()}
+ stop(quiet){this.playing=false;cancelAnimationFrame(this.raf);this.pads.forEach(p=>{p.classList.remove('warn','hot');p.style.removeProperty('--w')});
+  if(!quiet)this.led(true);
+  const pb=this.ui&&this.ui.querySelector('.play');if(pb)pb.textContent=L.play||'PLAY';this.root.classList.remove('on')}
+ resolve(h){let c=this.resolved.get(h);if(c)return c;c=h.cells.slice();const aim=h[2]||0,hole=h[3]||0;
+  if(aim&&AIM[aim])AIM[aim](this.px,this.py).forEach(([x,y])=>{if(x>=0&&x<8&&y>=0&&y<8)c.push(y*8+x)});
+  if(hole){const hx=Math.min(8-hole,Math.max(0,this.px-((h[4]||0)<0?hole-1:0))),hy=Math.min(8-hole,Math.max(0,this.py-((h[5]||0)<0?hole-1:0)));
+   c=[];for(let j=0;j<64;j++){const x=j&7,y=j>>3;if(!(x>=hx&&x<hx+hole&&y>=hy&&y<hy+hole))c.push(j)}}
+  this.resolved.set(h,c);return c}
+ frame(t){const w=new Float32Array(64);
+  for(let k=this.i;k<this.hits.length;k++){const h=this.hits[k];if(h[0]>t+this.lead)break;
+   if(h[0]<=t){if(k===this.i){const cells=this.resolve(h);this.flash(cells,'boom',70);
+     blip(300+cells.length*6,.06,'square',this.mode==='demo'?.02:.03);this.i++}continue}
+   const p=1-(h[0]-t)/this.lead;this.resolve(h).forEach(c=>{if(p>w[c])w[c]=p})}
+  for(let c=0;c<64;c++){const p=this.pads[c];if(w[c]>0){p.classList.add('warn');p.classList.toggle('hot',w[c]>.8);p.style.setProperty('--w',w[c].toFixed(3))}else if(p.classList.contains('warn')){p.classList.remove('warn','hot')}}
+  if(t>this.endMs){if(this.mode==='demo'){this.start(0)}else{this.stop()}}}
+}
+document.querySelectorAll('.bb').forEach(r=>new Board(r));
+// small LED marks: twinkle the header logo, city filter glow is CSS
+})();
+"""
+
+NAV = [("index.html", "nav.songs"), ("rating.html", "nav.rating"), ("stepup.html", "nav.stepup"), ("rules.html", "nav.rules")]
+LOGO = "".join(f'<i class="{"on" if c == "1" else ""}" style="--d:{i}"></i>' for i, c in enumerate("101010101"))
 
 
-def page(rel, active, title, desc, body, script=""):
-    pre = "../" if rel else ""
-    nav = "".join(f'<a href="{pre}{h}"{" class=on" if h == active else ""}>{t}</a>' for h, t in NAV)
-    return (f'<!doctype html><html lang="ko"><head><meta charset="utf-8">'
+def page(path, active, title, desc, body, script=""):
+    """path is relative to the language root, e.g. "index.html" or "songs/la1.html"."""
+    depth = path.count("/")
+    base = "../" * depth
+    shared = base + ("../" if LANG == "en" else "")
+    other = (base + "en/" + path) if LANG == "ko" else (base + "../" + path)
+    nav = "".join(f'<a href="{base}{h}"{" class=on" if h == active else ""}>{t(k)}</a>' for h, k in NAV)
+    nav += f'<a class="lang" href="{other}" hreflang="{"en" if LANG == "ko" else "ko"}">{t("nav.lang")}</a>'
+    labels = json.dumps({"play": "▶ " + t("board.play").upper(), "stop": "■ " + t("board.stop").upper(),
+                         "hits": t("board.hits").upper(), "dodged": t("board.dodged").upper()}, ensure_ascii=False)
+    url_ko = f"{SITE}/{path}"
+    url_en = f"{SITE}/en/{path}"
+    return (f'<!doctype html><html lang="{LANG}"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{e(title)} · BeatBound 위키</title><meta name="description" content="{e(desc)}">'
-            f'<link rel="icon" type="image/png" href="{pre}../../assets/beatbound-icon-128.png">'
-            f'<link rel="stylesheet" href="{pre}wiki.css?v={VERSION}"></head><body>'
-            f'<header class="top"><div class="in"><a class="brand" href="{pre}index.html">BEAT<b>BOUND</b> WIKI</a>'
+            f'<title>{e(title)} · {t("site")}</title><meta name="description" content="{e(desc)}">'
+            f'<link rel="alternate" hreflang="ko" href="{url_ko}"><link rel="alternate" hreflang="en" href="{url_en}">'
+            f'<meta property="og:title" content="{e(title)} · {t("site")}"><meta property="og:description" content="{e(desc)}">'
+            f'<link rel="icon" type="image/png" href="{shared}../../assets/beatbound-icon-128.png">'
+            f'<link rel="stylesheet" href="{shared}wiki.css?v={VERSION}"></head><body>'
+            f'<header class="top"><div class="in"><a class="brand" href="{base}index.html"><span class="logo">{LOGO}</span><span>BEAT<b>BOUND</b> WIKI</span></a>'
             f'<nav>{nav}</nav></div></header><main>{body}</main>'
-            f'<footer><div class="in">BeatBound © 2026 MeMe Games · 게임 데이터에서 자동 생성 ({e(BUILD_DATE)}) · '
-            f'레벨 평가기 {e(EVALUATOR)}</div></footer>{script}</body></html>\n')
+            f'<footer><div class="in">{e(t("footer", date=BUILD_DATE))}</div></footer>'
+            f'<script>window.BBL={labels}</script><script src="{shared}wiki.js?v={VERSION}" defer></script>{script}</body></html>\n')
 
 
 def lv_chip(tier_key, level, internal=None):
     if level is None:
         return '<span class="dim">–</span>'
-    title = f' title="내부 수치 {internal:.2f}"' if internal is not None else ""
+    title = f' title="{t("col.internal")} {internal:.2f}"' if internal is not None else ""
     return f'<span class="lv" style="color:{TIER_COLOR[tier_key]}"{title}>{level}</span>'
+
+
+def tier_chip(key, label=None):
+    return f'<span class="chip" style="color:{TIER_COLOR[key]}">{label or key.upper()}</span>'
 
 
 def city_chip(city):
     return f'<span class="chip" style="color:{city["color"]}">{e(city["name"])}</span>'
 
 
-def led(rows, color):
-    cells = []
-    alpha = {"0": None, "1": .35, "2": .65, "3": 1}
-    for r in rows:
-        for ch in r[:8]:
-            a = alpha.get(ch)
-            cells.append(f'<i style="background:{color};opacity:{a}"></i>' if a else "<i></i>")
-    return f'<div class="led" aria-hidden="true">{"".join(cells)}</div>'
+def mini_led(rows, color):
+    out = []
+    for y, r in enumerate(rows[:8]):
+        for x, ch in enumerate(r[:8]):
+            a = {"1": .35, "2": .65, "3": 1}.get(ch)
+            out.append(f'<i class="on" style="--a:{a};--d:{x + y}"></i>' if a else "<i></i>")
+    return f'<span class="mini" style="--c:{color}" aria-hidden="true">{"".join(out)}</span>'
+
+
+def board(song_id, rows, city, shared, demo=False, parts=None, tier="extreme"):
+    style = f'--accent:{city["color"]};--blast:{city["blast"]};--player:{city["player"]}'
+    led_attr = ",".join(rows)
+    head = (f'<div class="bb" data-src="{shared}data/{song_id}.json" data-led="{led_attr}" data-tier="{tier}"'
+            f'{" data-demo=1" if demo else ""} style="{style}"><div class="board" aria-label="8×8 launchpad"></div>')
+    if demo:
+        return head + "</div>"
+    tiers = "".join(f'<button data-tier="{k}" style="--c:{TIER_COLOR[k]}"{" class=on" if k == tier else ""}>{lbl}</button>'
+                    for k, lbl, *_ in TIERS)
+    opts = f'<option value="0">{t("board.from")} · 0:00</option>' + "".join(
+        f'<option value="{p["ms"]}">{e(p["name"])} · {fmt_time(p["ms"] / 1000)}</option>' for p in (parts or []))
+    return (head + f'<div class="bb-ui"><button class="play">▶ {t("board.play").upper()}</button>{tiers}'
+            f'<select aria-label="{t("board.from")}">{opts}</select>'
+            f'<button class="snd on" title="{t("board.sound")}">♪</button></div>'
+            f'<p class="bb-hint">{t("board.hint")}</p></div>')
 
 
 def heat(cells, color):
@@ -399,53 +571,49 @@ def heat(cells, color):
     out = []
     for v in cells:
         a = v / mx
-        out.append(f'<i style="background:{color};opacity:{.08 + .92 * a:.2f}"></i>' if v else '<i style="background:#ffffff0a"></i>')
-    return f'<div class="heat" title="고정 칸이 터진 횟수 (밝을수록 많이)">{"".join(out)}</div>'
+        out.append(f'<i style="background:{color};opacity:{.08 + .92 * a:.2f}" title="{v}"></i>' if v else '<i style="background:#ffffff0a"></i>')
+    return f'<div class="heat">{"".join(out)}</div>'
 
 
 def density(per_bar, bar_sec, color, peak):
     rates = [n / s if s else 0 for n, s in zip(per_bar, bar_sec)]
     mx = max(rates) or 1
-    bars = "".join(f'<i style="height:{max(2, 100 * r / mx):.0f}%;background:{color};opacity:{.95 if peak <= i < peak + 4 else .55}"></i>'
+    bars = "".join(f'<i style="--i:{i};height:{max(2, 100 * r / mx):.0f}%;background:{color};opacity:{.95 if peak <= i < peak + 4 else .5}"></i>'
                    for i, r in enumerate(rates))
-    return f'<div class="bars" title="마디별 폭발 수 (초당)">{bars}</div>'
+    return f'<div class="bars">{bars}</div>'
 
 
 def pct(x):
     return f"{100 * x:.0f}%"
 
 
-def rating_tier(value):
-    name = RATING_TIERS[0][0]
-    for n, lo in RATING_TIERS:
-        if value >= lo:
-            name = n
-    return name
-
-
 def tier_color(name):
     return TIER_COLORS[name.split()[0]]
 
 
+def need_text(st):
+    return t("need.grade", g=f'{st["grade"]}{"+" * st["plus"]}') if st["grade"] else t("need.clear")
+
+
 # ---------------------------------------------------------------- song notes (derived from the charts)
 def chart_notes(song, key):
-    t = song["tiers"][key]
+    tt = song["tiers"][key]
     notes = []
-    if t["sixteenth"] >= .2:
-        notes.append(f"16분 엇박 폭발이 {pct(t['sixteenth'])}로 많다. 손이 박자 사이에도 움직여야 한다.")
-    elif t["sixteenth"] < .03:
-        notes.append("거의 모든 폭발이 8분 정박 위에 있다.")
-    if t["hole"] >= .05:
-        notes.append(f"판 전체가 터지고 빈칸만 남는 '구멍' 폭발이 {pct(t['hole'])}. 빈칸을 찾아 들어가야 한다.")
-    if t["aim"] >= .05:
-        notes.append(f"플레이어 위치를 겨냥하는 조준 폭발이 {pct(t['aim'])} 섞여 있다.")
-    if t["cells"] >= 24:
-        notes.append(f"한 번에 평균 {t['cells']:.0f}칸이 터지는 넓은 패턴 위주.")
-    elif t["cells"] <= 10:
-        notes.append(f"한 번에 평균 {t['cells']:.0f}칸, 가는 선과 작은 블록 위주.")
-    pk = t["peak_bar"]
+    if tt["sixteenth"] >= .2:
+        notes.append(t("note.16th_many", p=pct(tt["sixteenth"])))
+    elif tt["sixteenth"] < .03:
+        notes.append(t("note.16th_none"))
+    if tt["hole"] >= .05:
+        notes.append(t("note.hole", p=pct(tt["hole"])))
+    if tt["aim"] >= .05:
+        notes.append(t("note.aim", p=pct(tt["aim"])))
+    if tt["cells"] >= 24:
+        notes.append(t("note.wide", n=f'{tt["cells"]:.0f}'))
+    elif tt["cells"] <= 10:
+        notes.append(t("note.thin", n=f'{tt["cells"]:.0f}'))
+    pk = tt["peak_bar"]
     sec_name = section_at(song, pk)
-    notes.append(f"가장 빽빽한 곳은 {pk + 1}–{pk + 4}마디{(' (' + sec_name + ')') if sec_name else ''}, 초당 {t['peak_nps']:.1f}회.")
+    notes.append(t("note.peak", a=pk + 1, b=pk + 4, sec=f" ({sec_name})" if sec_name else "", n=f'{tt["peak_nps"]:.1f}'))
     return notes
 
 
@@ -461,149 +629,142 @@ def section_at(song, bar):
     return name
 
 
+def part_list(song):
+    x = song["tiers"]["extreme"]
+    out = []
+    for p in song["parts"]:
+        ms = x["bar_starts"][min(p["bar"], len(x["bar_starts"]) - 1)]
+        out.append(dict(bar=p["bar"], name=p["name"], ms=ms))
+    return out
+
+
 # ---------------------------------------------------------------- pages
 def song_page(song, cities, ranks, courses_by_song, starters_by_song):
     city = cities[song["city"]]
-    col = city["color"]
     T = song["tiers"]
-    body = [f'<p class="eyebrow"><a href="../index.html#{city["slug"]}">{e(city["name"])}</a> · {e(song["genre"])}</p>',
-            '<div class="hero">', led(song["rows"], col),
-            f'<div><h1>{e(song["title"])}</h1><p class="lead">{e(song["tagline"])}</p>',
-            f'<p class="small mut">{e(song["artist"])} · {fmt_bpm(song["bpm"])} BPM · {fmt_time(song["play"])}',
-            f'{" · DLC 팩" if city["dlc"] else ""}</p><p>',
-            " ".join(f'{lv_chip(k, T[k]["level"], T[k]["internal"])}' for k, *_ in TIERS),
-            '</p></div></div>']
+    parts = part_list(song)
+    shared = "../" + ("../" if LANG == "en" else "")
+    body = [f'<div class="hero" style="--accent:{city["color"]}">',
+            board(song["id"], song["rows"], city, shared, parts=parts),
+            f'<div><p class="eyebrow"><a href="../index.html#{city["slug"]}">{e(city["name"])}</a> · {e(song["genre"])}</p>'
+            f'<h1>{e(song["title"])}</h1><p class="lead">{e(song["tagline"])}</p>'
+            f'<p class="small mut">{e(song["artist"])} · {fmt_bpm(song["bpm"])} BPM · {fmt_time(song["play"])}'
+            f'{" · " + t("song.dlc") if city["dlc"] else ""}</p><p>'
+            + " ".join(lv_chip(k, T[k]["level"], T[k]["internal"]) for k, *_ in TIERS) + "</p>"]
 
-    # features
-    body.append('<h2>곡 특징</h2><div class="grid g2"><div class="card"><dl class="kv">')
-    kv = [("도시", f'{city_chip(city)} <span class="mut small">{e(city["tagline"])}</span>'),
-          ("장르", e(song["genre"])), ("템포", f'{fmt_bpm(song["bpm"])} BPM'),
-          ("플레이 길이", f'{fmt_time(song["play"])} · {T["extreme"]["bars"]}마디'),
-          ("곡 그림", f'{e(song["motif"])} (왼쪽 8×8 LED)' if song["motif"] else "–")]
-    if song["basis"]:
-        kv.insert(4, ("사운드", e(song["basis"])))
-    body += [f"<dt>{k}</dt><dd>{v}</dd>" for k, v in kv]
-    body.append('</dl></div><div class="card"><h3 style="margin-top:0">구간</h3>')
-    if song["parts"]:
-        body.append('<ul class="plain small">')
-        bar_t = T["extreme"]
-        for p in song["parts"]:
-            sec = bar_t["first"] + sum(bar_t["bar_sec"][:p["bar"]])
-            body.append(f'<li><span class="mono mut">{p["bar"] + 1:>3}마디 · {fmt_time(sec)}</span> {e(p["name"])}</li>')
-        body.append("</ul>")
+    basis = song["basis"] if LANG == "ko" else song["basis_en"]
+    motif = song["motif"] if LANG == "ko" else song["motif_en"]
+    kv = [(t("song.city"), f'{city_chip(city)} <span class="mut small">{e(city["tagline"])}</span>'),
+          (t("song.genre"), e(song["genre"])), (t("song.tempo"), f'{fmt_bpm(song["bpm"])} BPM'),
+          (t("song.length"), f'{fmt_time(song["play"])} · {t("song.bars", n=T["extreme"]["bars"])}')]
+    if basis:
+        kv.append((t("song.sound"), e(basis)))
+    if motif:
+        kv.append((t("song.picture"), e(t("song.picture_note", motif=motif))))
+    body.append('<dl class="kv" style="margin-top:14px">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in kv) + "</dl></div></div>")
+
+    # sections + fever
+    body.append(f'<h2>{t("song.sections")}</h2><div class="card">')
+    if parts:
+        body.append('<ul class="parts">' + "".join(
+            f'<li><button data-seek="{p["ms"]}"><span class="pt">▶ {e(t("song.bar", n=p["bar"] + 1))} · {fmt_time(p["ms"] / 1000)}</span>{e(p["name"])}</button></li>'
+            for p in parts) + "</ul>")
     for fv in song["fever"]:
         s, n = fv["startBar"], fv["bars"]
-        body.append(f'<p class="small"><b style="color:#ffd34d">FEVER</b> {s + 1}–{s + n}마디. '
-                    f'이 구간에선 근접(COOL)·JUST 점수가 두 배.</p>')
-    body.append("</div></div>")
-
-    # tier cards
-    body.append('<h2>난이도별 노트</h2><p class="mut small">막대는 마디마다 초당 폭발 수(진한 부분이 가장 빽빽한 4마디), '
-                '사각형은 8×8 판에서 고정 칸이 터진 횟수입니다. 조준·구멍 폭발은 플레이어 위치에 따라 바뀌어 사각형에서 뺐습니다.</p>'
-                '<div class="tier-cards">')
-    for key, label, rule, _ in TIERS:
-        t = T[key]
-        c = TIER_COLOR[key]
-        rk = ranks[key].get(song["id"])
-        body.append(f'<div class="card tc"><h3><span class="chip" style="color:{c}">{label}</span>'
-                    f'<span class="big" style="color:{c}">Lv {t["level"]}</span>'
-                    f'<span class="mono mut small" style="margin-left:auto">{t["internal"]:.2f}</span></h3>'
-                    f'{density(t["per_bar"], t["bar_sec"], c, t["peak_bar"])}'
-                    f'<div style="display:flex;gap:14px;align-items:flex-start;margin-top:10px">{heat(t["heat"], c)}'
-                    f'<dl class="kv small"><dt>폭발</dt><dd class="mono">{t["blasts"]}</dd>'
-                    f'<dt>초당</dt><dd class="mono">{t["nps"]:.2f}</dd>'
-                    f'<dt>평균 칸</dt><dd class="mono">{t["cells"]:.1f}</dd>'
-                    f'<dt>16분</dt><dd class="mono">{pct(t["sixteenth"])}</dd>'
-                    f'<dt>예고</dt><dd class="mono">{t["lead_sec"]:.2f}s</dd></dl></div>'
-                    f'<ul class="plain small mut" style="margin-top:10px">'
-                    + "".join(f"<li>{e(n)}</li>" for n in chart_notes(song, key)) +
-                    f'</ul><p class="small dim">{label} {len(ranks[key])}곡 중 {rk}번째로 어려움</p></div>')
+        body.append(f'<p class="small" style="margin-top:10px"><b style="color:#ffd34d">FEVER</b> {e(t("song.fever", a=s + 1, b=s + n))}</p>')
     body.append("</div>")
 
-    # rating
-    body.append('<h2>레이팅 계산</h2><p class="mut">채보 한 칸의 레이팅 값 = 내부 수치 × min(1, 점수 ÷ 1,000,000). '
-                '완주한 기록만 셉니다. 이 값이 내 상위 1–5위 안이면 ×1/10, 6–20위면 ×1/30으로 레이팅에 더해집니다. '
-                '<a href="../rating.html">레이팅 전체 설명</a></p>')
-    scores = [1000000, 980000, 950000, 900000, 800000, 700000]
-    body.append('<div class="tw"><table><thead><tr><th>난이도</th><th class="n">내부 수치</th>'
-                + "".join(f'<th class="n">{s // 1000}k</th>' for s in scores)
-                + '<th class="n">1–5위 기여</th><th class="n">6–20위 기여</th></tr></thead><tbody>')
+    # tier cards
+    body.append(f'<h2>{t("song.notes")}</h2><p class="mut small">{t("song.notes_lead")}</p><div class="tier-cards">')
     for key, label, rule, _ in TIERS:
-        t = T[key]
-        lv = t["internal"]
-        body.append(f'<tr><td><span class="chip" style="color:{TIER_COLOR[key]}">{label}</span></td>'
-                    f'<td class="n">{lv:.3f}</td>'
-                    + "".join(f'<td class="n">{lv * min(1, s / MAX_SCORE):.3f}</td>' for s in scores)
-                    + f'<td class="n">+{lv / 10:.3f}</td><td class="n">+{lv / 30:.3f}</td></tr>')
-    body.append("</tbody></table></div>")
-    body.append(f'<p class="small mut">PERFECT는 EXTREME과 같은 채보에 피격 1회면 실패하는 규칙이라, EXTREME 칸에서 둘 중 높은 값을 씁니다. '
-                f'100만점을 넘는 점수(JUST 보너스)도 계수는 1에서 멈춥니다.</p>')
+        tt = T[key]
+        c = TIER_COLOR[key]
+        rk = ranks[key].get(song["id"])
+        body.append(f'<div class="card tc" style="--tc:{c}"><h3>{tier_chip(key, label)}'
+                    f'<span class="big" style="color:{c}">Lv {tt["level"]}</span>'
+                    f'<button class="go" data-playtier="{key}">▶ {t("board.play").upper()}</button></h3>'
+                    f'{density(tt["per_bar"], tt["bar_sec"], c, tt["peak_bar"])}'
+                    f'<div style="display:flex;gap:14px;align-items:flex-start;margin-top:10px">{heat(tt["heat"], c)}'
+                    f'<dl class="kv small"><dt>{t("song.k.blasts")}</dt><dd class="mono">{tt["blasts"]}</dd>'
+                    f'<dt>{t("song.k.nps")}</dt><dd class="mono">{tt["nps"]:.2f}</dd>'
+                    f'<dt>{t("song.k.cells")}</dt><dd class="mono">{tt["cells"]:.1f}</dd>'
+                    f'<dt>{t("song.k.16th")}</dt><dd class="mono">{pct(tt["sixteenth"])}</dd>'
+                    f'<dt>{t("song.k.lead")}</dt><dd class="mono">{tt["lead_sec"]:.2f}s</dd></dl></div>'
+                    f'<ul class="plain small mut" style="margin-top:10px">'
+                    + "".join(f"<li>{e(n)}</li>" for n in chart_notes(song, key)) +
+                    f'</ul><p class="small dim">{e(t("song.rank", tier=label, n=len(ranks[key]), r=rk))}</p></div>')
+    body.append("</div>")
 
     # score detail
-    body.append('<h2>점수 배점</h2><p class="mut">곡마다 100만점이 “피격 0, 근접(COOL)을 최대로 챙기고 JUST는 하나도 없는” 최적 플레이가 되도록 '
-                '단위 u를 정합니다. JUST는 100만점 위로 넘치는 보너스입니다. <a href="../rules.html">점수·랭크 규칙</a></p>')
-    body.append('<div class="tw"><table><thead><tr><th>난이도</th><th class="n">폭발</th><th class="n">단위 u</th>'
-                '<th class="n">피함 3u</th><th class="n">COOL·JUST u</th><th class="n">BONUS 20u</th><th class="n">피격 −10u</th>'
-                '<th class="n">최대 COOL</th><th class="n">FEVER 안</th><th class="n">피격 허용</th></tr></thead><tbody>')
+    body.append(f'<h2>{t("song.score")}</h2><p class="mut">{t("song.score_lead")} <a href="../rules.html">{t("song.score_more")}</a></p>')
+    body.append(f'<div class="tw"><table><thead><tr><th>{t("col.tier")}</th><th class="n">{t("col.blasts")}</th><th class="n">{t("col.unit")}</th>'
+                f'<th class="n">{t("col.dodge")}</th><th class="n">COOL·JUST u</th><th class="n">BONUS 20u</th><th class="n">{t("col.hit")}</th>'
+                f'<th class="n">{t("col.maxcool")}</th><th class="n">{t("col.infever")}</th><th class="n">{t("col.hitbudget")}</th></tr></thead><tbody>')
     for key, label, rule, _ in TIERS:
-        t = T[key]
-        u = t["unit"]
-        body.append(f'<tr><td><span class="chip" style="color:{TIER_COLOR[key]}">{label}</span></td>'
-                    f'<td class="n">{t["blasts"]}</td><td class="n">{u}</td><td class="n">{3 * u}</td><td class="n">{u}</td>'
-                    f'<td class="n">{20 * u}</td><td class="n">−{10 * u}</td><td class="n">{t["max_near"] or "–"}</td>'
-                    f'<td class="n">{t["near_fever"] if t["near_fever"] is not None else "–"}</td>'
-                    f'<td class="n">{t["budget"]}</td></tr>')
+        tt = T[key]
+        u = tt["unit"]
+        body.append(f'<tr><td>{tier_chip(key, label)}</td>'
+                    f'<td class="n">{tt["blasts"]}</td><td class="n">{u}</td><td class="n">{3 * u}</td><td class="n">{u}</td>'
+                    f'<td class="n">{20 * u}</td><td class="n">−{10 * u}</td><td class="n">{tt["max_near"] or "–"}</td>'
+                    f'<td class="n">{tt["near_fever"] if tt["near_fever"] is not None else "–"}</td>'
+                    f'<td class="n">{tt["budget"]}</td></tr>')
     body.append("</tbody></table></div>")
     x = T["extreme"]
-    body.append(f'<p class="small mut">피격 허용은 연속으로 맞아도 버티는 횟수입니다(EASY 4.2%, 나머지 3%, PERFECT 1회). '
-                f'EXTREME 기준: 원점수 100만 기준 {x["ref"]:,} = 폭발·BONUS {x["baseline"]:,} + 50 × (COOL {x["max_near"]} + FEVER 안 COOL {x["near_fever"]}).</p>')
+    note = t("song.score_note", ref=f'{x["ref"]:,}', base=f'{x["baseline"]:,}', cool=x["max_near"], fever=x["near_fever"])
+    body.append(f'<p class="small mut">{e(note)}</p>')
 
     # courses
     extra = []
     for c, i, st in courses_by_song.get(song["id"], []):
-        need = f' · {st["grade"]}{"+" * st["plus"]} 이상' if st["grade"] else " · 클리어"
-        extra.append(f'<li><a href="../stepup.html#{c["id"]}">STEP UP {e(c["title"])}</a> {i + 1}번째 곡 · {st["rule"]}{need}</li>')
+        extra.append(f'<li><a href="../stepup.html#{c["id"]}">{e(t("song.course_stepup", title=c["title"]))}</a> · '
+                     f'{e(t("song.course_pos", n=i + 1))} · {st["rule"]} · {e(need_text(st))}</li>')
     for s, i, st in starters_by_song.get(song["id"], []):
-        extra.append(f'<li><a href="../stepup.html#starter-{s["band"].lower()}">스타터 {e(s["title"])}</a> {i + 1}단계 · {st["rule"]}</li>')
+        extra.append(f'<li><a href="../stepup.html#starter-{s["band"].lower()}">{e(t("song.course_starter", title=s["title"]))}</a> · '
+                     f'{e(t("song.course_step", n=i + 1))} · {st["rule"]}</li>')
     if extra:
-        body.append('<h2>코스</h2><ul class="plain">' + "".join(extra) + "</ul>")
+        body.append(f'<h2>{t("song.courses")}</h2><ul class="plain">' + "".join(extra) + "</ul>")
 
     prev_next = NEIGHBOURS[song["id"]]
     body.append('<p style="margin-top:40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap" class="small">'
                 + (f'<a href="{prev_next[0]["id"]}.html">← {e(prev_next[0]["title"])}</a>' if prev_next[0] else "<span></span>")
                 + (f'<a href="{prev_next[1]["id"]}.html">{e(prev_next[1]["title"])} →</a>' if prev_next[1] else "")
                 + "</p>")
-    desc = f'{song["title"]} ({city["name"]}, {fmt_bpm(song["bpm"])} BPM) — 난이도별 노트, 레이팅 값, 점수 배점.'
-    return page(True, "index.html", song["title"], desc, "".join(body))
+    desc = t("song.desc", title=song["title"], city=city["name"], bpm=fmt_bpm(song["bpm"]))
+    return page(f"songs/{song['id']}.html", "index.html", song["title"], desc, "".join(body))
 
 
 def index_page(songs, cities):
-    body = ['<p class="eyebrow">BeatBound Wiki</p><h1>곡 목록</h1>',
-            f'<p class="lead">BeatBound에 들어 있는 {len(songs)}곡, {len(cities)}개 도시. 곡마다 난이도별 노트 특징, '
-            '레이팅에 들어가는 내부 수치, 점수 배점을 정리했습니다. 숫자는 모두 게임 데이터에서 그대로 뽑았습니다.</p>',
-            '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px">'
-            '<input class="search" id="q" type="search" placeholder="곡, 장르 검색" aria-label="곡 검색"></div>',
-            '<div class="filters" id="cities"><button class="on" data-c="">전체</button>']
+    shared = "../" if LANG == "en" else ""
+    la = next(s for s in songs if s["id"] == "la1")
+    body = [f'<div class="hero" style="--accent:{cities[la["city"]]["color"]}">',
+            board("la1", la["rows"], cities[la["city"]], shared, demo=True),
+            f'<div><p class="eyebrow">BeatBound Wiki</p><h1>{t("index.title")}</h1>'
+            f'<p style="font-size:17px">{t("index.hero")}</p>'
+            f'<p class="lead">{t("index.lead", songs=len(songs), cities=len(cities))}</p>'
+            f'<p class="small dim">↖ {t("index.demo")} · <a href="songs/la1.html">{t("board.play")} →</a></p></div></div>',
+            '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:34px">'
+            f'<input class="search" id="q" type="search" placeholder="{t("index.search")}" aria-label="{t("index.search")}"></div>',
+            f'<div class="filters" id="cities"><button class="on" data-c="">{t("index.all")}</button>']
     for c in cities.values():
-        body.append(f'<button data-c="{c["slug"]}" id="{c["slug"]}">{e(c["name"])}</button>')
-    body.append('</div><div class="tw"><table id="songs"><thead><tr>'
-                '<th class="sort" data-k="t">곡</th><th class="sort" data-k="c">도시</th><th>장르</th>'
-                '<th class="sort n" data-k="b">BPM</th><th class="sort n" data-k="l">길이</th>'
-                + "".join(f'<th class="sort n" data-k="{k}">{lbl}</th>' for k, lbl, *_ in TIERS)
+        body.append(f'<button data-c="{c["slug"]}" id="{c["slug"]}" style="--c:{c["color"]}">{e(c["name"])}</button>')
+    body.append(f'</div><div class="tw"><table id="songs"><thead><tr>'
+                f'<th class="sort">{t("col.song")}</th><th class="sort">{t("col.city")}</th><th>{t("col.genre")}</th>'
+                f'<th class="sort n">BPM</th><th class="sort n">{t("col.length")}</th>'
+                + "".join(f'<th class="sort n">{lbl}</th>' for k, lbl, *_ in TIERS)
                 + '</tr></thead><tbody>')
     for s in songs:
         c = cities[s["city"]]
         T = s["tiers"]
         body.append(f'<tr data-c="{c["slug"]}" data-q="{e((s["title"] + " " + s["genre"] + " " + c["name"]).lower())}">'
-                    f'<td data-v="{e(s["title"].lower())}"><a href="songs/{s["id"]}.html">{e(s["title"])}</a></td>'
+                    f'<td data-v="{e(s["title"].lower())}"><span class="songcell">{mini_led(s["rows"], c["color"])}'
+                    f'<a href="songs/{s["id"]}.html">{e(s["title"])}</a></span></td>'
                     f'<td data-v="{s["city"]:02d}{s["number"]:04d}">{city_chip(c)}</td><td class="small mut">{e(s["genre"])}</td>'
                     f'<td class="n" data-v="{s["bpm"]}">{fmt_bpm(s["bpm"])}</td><td class="n" data-v="{s["play"]:.0f}">{fmt_time(s["play"])}</td>'
                     + "".join(f'<td class="n" data-v="{T[k]["internal"]:.3f}">{lv_chip(k, T[k]["level"], T[k]["internal"])}'
                               f' <span class="dim small">{T[k]["internal"]:.2f}</span></td>' for k, *_ in TIERS)
                     + "</tr>")
     body.append("</tbody></table></div>")
-    body.append('<p class="small mut">레벨 칩은 게임에 보이는 표시 레벨(내부 수치 반올림, 1–12), 옆의 작은 숫자는 레이팅에 쓰는 내부 수치입니다. '
-                'JAKARTA·SAPPORO·NEO AKIBA는 DLC 팩 도시입니다.</p>')
+    body.append(f'<p class="small mut">{t("index.legend")}</p>')
     script = """<script>
 (()=>{const rows=[...document.querySelectorAll('#songs tbody tr')],q=document.getElementById('q');let city='';
 function apply(){const s=q.value.trim().toLowerCase();rows.forEach(r=>{r.hidden=(city&&r.dataset.c!==city)||(s&&!r.dataset.q.includes(s));});}
@@ -615,159 +776,127 @@ const tb=document.querySelector('#songs tbody');rows.sort((a,b)=>{const x=a.chil
 return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir;}).forEach(r=>tb.appendChild(r));};});
 const h=location.hash.slice(1);if(h){const b=document.querySelector('#cities button[data-c="'+h+'"]');if(b)b.click();}
 })();</script>"""
-    return page(False, "index.html", "곡 목록", "BeatBound 전곡의 난이도, 노트 특징, 레이팅 내부 수치.", "".join(body), script)
+    return page("index.html", "index.html", t("index.title"), t("index.desc"), "".join(body), script)
 
 
 def rating_page(songs, cities):
     vals = sorted((s["tiers"][k]["internal"], s, k) for s in songs for k, *_ in TIERS)[::-1]
     top = [v for v, *_ in vals[:20]]
     chart_max = sum(v / 10 for v in top[:5]) + sum(v / 30 for v in top[5:20])
-    body = ['<p class="eyebrow">Rating</p><h1>레이팅</h1>',
-            '<p class="lead">레이팅은 내가 잘 친 채보 20개로 정해지는 실력 숫자입니다. 어려운 채보를 높은 점수로 완주할수록 오릅니다. '
-            '승패나 플레이 횟수는 들어가지 않습니다.</p>',
-            '<h2>계산식</h2><div class="formula">채보 값   = 내부 수치 × min(1, 점수 ÷ 1,000,000)      (완주한 기록만, 실패·중간 시작은 0)\n'
-            '레이팅    = (1~5위 채보 값 합) × 1/10\n'
-            '          + (6~20위 채보 값 합) × 1/30\n'
-            '          + STEP UP 보너스 (최대 0.50)\n'
-            '          + 래더 시즌 보너스 (최대 0.50)</div>',
-            '<ul class="plain"><li><b>채보 칸</b>은 곡 × EASY/NORMAL/HARD/EXTREME입니다. 한 칸에는 그 칸의 최고 기록 하나만 들어갑니다.</li>'
-            '<li><b>PERFECT</b>는 EXTREME 채보를 피격 1회 실패 규칙으로 치는 것이라 EXTREME 칸에 합쳐지고, 둘 중 높은 값을 씁니다.</li>'
-            '<li>가중치 합은 5×1/10 + 15×1/30 = 1. 20칸을 모두 같은 값 x로 채우면 레이팅도 x가 됩니다.</li>'
-            '<li>빈 칸은 0으로 셉니다. 기록이 20개 미만이면 그만큼 낮아집니다.</li>'
-            '<li>점수가 100만을 넘어도(JUST 보너스) 계수는 1에서 멈춥니다.</li>'
-            '<li>화면 숫자는 소수 둘째 자리에서 <b>버립니다</b>. 9.999는 9.99로 보입니다.</li>'
-            '<li>래더·친구 대전 기록도 일반 기록처럼 레이팅에 들어갑니다. 대전 승패는 레이팅을 움직이지 않습니다.</li></ul>',
-            '<h2>예시</h2>']
-    ex = vals[:1][0]
-    v, s, k = ex
-    body.append(f'<div class="card"><p><a href="songs/{s["id"]}.html">{e(s["title"])}</a> {k.upper()} (내부 수치 {v:.3f})를 '
-                f'950,000점으로 완주하면 채보 값은 {v:.3f} × 0.95 = <b class="mono">{v * .95:.3f}</b>. '
-                f'이 값이 내 1위면 레이팅에 {v * .95 / 10:.3f}, 6위 이하라면 {v * .95 / 30:.3f}을 더합니다.</p>'
-                f'<p class="mut small">상위 5칸이 레이팅의 절반을 차지합니다. 같은 점수라도 1–5위 안의 채보를 올리는 쪽이 세 배 효과가 큽니다.</p></div>')
-    body.append('<h2>등급</h2><div class="tw"><table><thead><tr><th>등급</th><th class="n">레이팅</th></tr></thead><tbody>')
+    body = [f'<p class="eyebrow">Rating</p><h1>{t("rating.title")}</h1><p class="lead">{t("rating.lead")}</p>',
+            f'<h2>{t("rating.formula")}</h2><div class="formula">{e(t("rating.formula_text"))}</div>',
+            '<ul class="plain">' + "".join(f"<li>{t('rating.b' + str(i))}</li>" for i in range(1, 8)) + "</ul>",
+            f'<h2>{t("rating.example")}</h2>']
+    v, s, k = vals[0]
+    link = f'<a href="songs/{s["id"]}.html">{e(s["title"])}</a>'
+    ex = t("rating.example_text", song=link, tier=k.upper(), v=f"{v:.3f}", cv=f'<b class="mono">{v * .95:.3f}</b>',
+           a=f"{v * .95 / 10:.3f}", b=f"{v * .95 / 30:.3f}")
+    body.append(f'<div class="card"><p>{ex}</p>'
+                f'<p class="mut small">{t("rating.example_note")}</p></div>')
+    body.append(f'<h2>{t("rating.tiers")}</h2><div class="tw"><table><thead><tr><th>{t("col.tiername")}</th><th class="n">{t("col.rating")}</th></tr></thead><tbody>')
     for i, (n, lo) in enumerate(RATING_TIERS):
-        hi = f'{RATING_TIERS[i + 1][1] - .01:.2f}' if i + 1 < len(RATING_TIERS) else "+"
-        rng = f"{lo:.2f} ~ {hi}" if hi != "+" else f"{lo:.2f} +"
+        rng = f"{lo:.2f} ~ {RATING_TIERS[i + 1][1] - .01:.2f}" if i + 1 < len(RATING_TIERS) else f"{lo:.2f} +"
         body.append(f'<tr><td><span class="chip" style="color:{tier_color(n)}">{n}</span></td><td class="n">{rng}</td></tr>')
-    body.append('</tbody></table></div><p class="small mut">MASTER(10.00 이상)는 더 나누지 않고 온라인 순위로 “MASTER #n”을 표시합니다. '
-                'EMERALD(8.00)에 닿으면 모든 곡의 EXTREME이 열립니다.</p>')
-    body.append('<h2>보너스</h2><div class="grid g2"><div class="card"><h3 style="margin-top:0">STEP UP 보너스 · 최대 0.50</h3>'
-                '<p class="small">코스를 통과할 때마다 코스 보너스가 한 번 더해집니다. 8코스를 모두 통과하면 0.50. '
-                '<a href="stepup.html">코스 목록</a></p></div>'
-                '<div class="card"><h3 style="margin-top:0">래더 시즌 보너스 · 최대 0.50</h3>'
-                '<p class="small">래더를 시즌에 20판 이상(고스트 판은 10판까지만 셈) 하면 순위가 매겨지고, 순위에 따라 보너스를 받습니다.</p>'
-                '<div class="tw"><table><thead><tr><th>순위</th><th class="n">보너스</th></tr></thead><tbody>'
-                '<tr><td>TOP 3 또는 상위 1%</td><td class="n">0.5</td></tr><tr><td>TOP 10 또는 상위 5%</td><td class="n">0.4</td></tr>'
-                '<tr><td>상위 10%</td><td class="n">0.3</td></tr><tr><td>상위 25%</td><td class="n">0.2</td></tr>'
-                '<tr><td>상위 50%</td><td class="n">0.1</td></tr></tbody></table></div>'
-                '<p class="small mut">어느 구간이든 순위권 인원의 상위 절반 안이어야 합니다. 시즌이 바뀌면 딴 보너스를 한 시즌 그대로 지키고, '
-                '그 뒤로는 못 따면 시즌마다 0.1씩 줄어듭니다.</p></div></div>')
-    body.append(f'<h2>이론상 최대</h2><p>전 채보를 100만점 이상으로 완주했을 때 채보 몫은 <b class="mono">{chart_max:.3f}</b>, '
-                f'보너스를 모두 받으면 <b class="mono">{chart_max + 1:.3f}</b>입니다. 이보다 높은 값은 온라인 순위에 올라가지 않습니다.</p>')
-    body.append('<h2>내부 수치가 높은 채보 TOP 20</h2><div class="tw"><table><thead><tr><th class="n">#</th><th>곡</th><th>난이도</th>'
-                '<th class="n">내부 수치</th><th class="n">표시 Lv</th></tr></thead><tbody>')
+    body.append(f'</tbody></table></div><p class="small mut">{t("rating.tiers_note")}</p>')
+    ladder = "".join(f'<tr><td>{t("ladder.r" + str(i))}</td><td class="n">{b}</td></tr>' for i, b in enumerate(["0.5", "0.4", "0.3", "0.2", "0.1"], 1))
+    body.append(f'<h2>{t("rating.bonus")}</h2><div class="grid g2"><div class="card"><h3 style="margin-top:0">{t("rating.bonus_stepup")}</h3>'
+                f'<p class="small">{t("rating.bonus_stepup_text")} <a href="stepup.html">{t("rating.courses_link")}</a></p></div>'
+                f'<div class="card"><h3 style="margin-top:0">{t("rating.bonus_ladder")}</h3><p class="small">{t("rating.bonus_ladder_text")}</p>'
+                f'<div class="tw"><table><thead><tr><th>{t("col.rank")}</th><th class="n">{t("col.bonus")}</th></tr></thead><tbody>{ladder}</tbody></table></div>'
+                f'<p class="small mut">{t("rating.ladder_note")}</p></div></div>')
+    body.append(f'<h2>{t("rating.max")}</h2><p>{t("rating.max_text", a=f'<b class="mono">{chart_max:.3f}</b>', b=f'<b class="mono">{chart_max + 1:.3f}</b>')}</p>')
+    body.append(f'<h2>{t("rating.top")}</h2><div class="tw"><table><thead><tr><th class="n">#</th><th>{t("col.song")}</th><th>{t("col.tier")}</th>'
+                f'<th class="n">{t("col.internal")}</th><th class="n">{t("col.shownlv")}</th></tr></thead><tbody>')
     for i, (v, s, k) in enumerate(vals[:20]):
-        body.append(f'<tr><td class="n">{i + 1}</td><td><a href="songs/{s["id"]}.html">{e(s["title"])}</a> '
-                    f'<span class="dim small">{e(cities[s["city"]]["name"])}</span></td>'
-                    f'<td><span class="chip" style="color:{TIER_COLOR[k]}">{k.upper()}</span></td><td class="n">{v:.3f}</td>'
-                    f'<td class="n">{s["tiers"][k]["level"]}</td></tr>')
+        body.append(f'<tr><td class="n">{i + 1}</td><td><span class="songcell">{mini_led(s["rows"], cities[s["city"]]["color"])}<a href="songs/{s["id"]}.html">{e(s["title"])}</a></span></td>'
+                    f'<td>{tier_chip(k)}</td><td class="n">{v:.3f}</td><td class="n">{s["tiers"][k]["level"]}</td></tr>')
     body.append('</tbody></table></div>')
-    body.append(f'<h2>내부 수치는 어떻게 정하나</h2><p>채보마다 게임에 들어 있는 난이도 평가기({e(EVALUATOR)})가 채보를 읽어 소수점 수치를 냅니다. '
-                '보는 것은 대략 세 가지입니다.</p><ul class="plain">'
-                '<li><b>읽기</b>: 예고가 뜨고 터질 때까지 판을 읽고 갈 칸을 정하는 부담. 예고가 짧고 폭발이 겹칠수록 큽니다.</li>'
-                '<li><b>이동</b>: 안전한 칸으로 가는 거리와 시간. 직전 폭발이 남긴 안전 칸에서 다음 안전 칸까지 멀수록 큽니다(판을 꽉 채운 노트가 여기서 무거워집니다).</li>'
-                '<li><b>시간 밀도</b>: 1초 단위 부담을 평균 40%, 상위 20% 구간 50%, 가장 힘든 1초 10%로 섞습니다. 1초 하나가 8을 넘게 세지는 않고, '
-                '빠른 연속 쓸기는 한 번의 물결로 봐 부담을 줄입니다.</li></ul>'
-                '<p>표시 레벨은 이 수치를 반올림한 값(1–12)입니다. 레이팅은 반올림 전 수치를 그대로 씁니다.</p>')
-    return page(False, "rating.html", "레이팅", "BeatBound 레이팅 계산식, 등급표, 보너스, 내부 수치 TOP 20.", "".join(body))
+    return page("rating.html", "rating.html", t("rating.title"), t("rating.desc"), "".join(body))
 
 
 def stepup_page(songs, cities, courses, starters):
     by_id = {s["id"]: s for s in songs}
     rule_key = {"EASY": "easy", "NORMAL": "normal", "HARD": "hard", "EXTREME": "extreme"}
-    body = ['<p class="eyebrow">STEP UP</p><h1>STEP UP 코스</h1>',
-            '<p class="lead">세 곡을 연달아 치는 인증 코스입니다. 한 곡이라도 실패하거나 요구 등급에 못 미치면 코스가 끝납니다. '
-            '통과하면 코스 보너스가 레이팅에 더해집니다(합계 최대 0.50).</p>',
-            '<ul class="plain small mut"><li>곡마다 완주가 기본 조건이고, 등급 조건이 있으면 그 등급(+, ++ 포함) 이상이어야 합니다.</li>'
-            '<li>코스 보너스는 앞의 다섯 코스(SPARK–RESONANCE)가 0.05–0.10, 팩 곡이 든 세 코스가 0.03–0.04입니다.</li>'
-            '<li>VELOCITY·OVERLOAD·ZENITH에는 JAKARTA·SAPPORO·NEO AKIBA 팩 곡이 하나씩 들어 있어 그 팩이 있어야 열립니다.</li></ul>']
+    body = [f'<p class="eyebrow">STEP UP</p><h1>{t("stepup.title")}</h1><p class="lead">{t("stepup.lead")}</p>',
+            '<ul class="plain small mut">' + "".join(f"<li>{t('stepup.b' + str(i))}</li>" for i in range(1, 4)) + "</ul>"]
     total = 0
     for c in courses:
         total += c["bonus"]
-        ints = []
-        rows = []
+        ints, rows = [], []
         for i, st in enumerate(c["stages"]):
             s = by_id[st["song"]]
             k = rule_key[st["rule"]]
-            t = s["tiers"][k]
-            ints.append(t["internal"])
-            need = f'{st["grade"]}{"+" * st["plus"]} 이상' if st["grade"] else "클리어"
-            rows.append(f'<tr><td class="n">{i + 1}</td><td><a href="songs/{s["id"]}.html">{e(s["title"])}</a></td>'
-                        f'<td>{city_chip(cities[s["city"]])}</td><td><span class="chip" style="color:{TIER_COLOR[k]}">{st["rule"]}</span></td>'
-                        f'<td class="n">{lv_chip(k, t["level"])}</td><td class="n">{t["internal"]:.2f}</td><td>{need}</td></tr>')
+            tt = s["tiers"][k]
+            ints.append(tt["internal"])
+            rows.append(f'<tr><td class="n">{i + 1}</td><td><span class="songcell">{mini_led(s["rows"], cities[s["city"]]["color"])}<a href="songs/{s["id"]}.html">{e(s["title"])}</a></span></td>'
+                        f'<td>{city_chip(cities[s["city"]])}</td><td>{tier_chip(k, st["rule"])}</td>'
+                        f'<td class="n">{lv_chip(k, tt["level"])}</td><td class="n">{tt["internal"]:.2f}</td><td>{e(need_text(st))}</td></tr>')
         pack = any(cities[by_id[st["song"]]["city"]]["dlc"] for st in c["stages"])
         body.append(f'<h2 id="{c["id"]}">{e(c["title"])} <span class="mono mut small">+{c["bonus"]:.2f}</span></h2>'
-                    f'<p class="small mut">평균 내부 수치 {sum(ints) / len(ints):.2f}{" · 팩 곡 포함" if pack else ""}</p>'
-                    '<div class="tw"><table><thead><tr><th class="n">#</th><th>곡</th><th>도시</th><th>난이도</th><th class="n">Lv</th>'
-                    '<th class="n">내부 수치</th><th>조건</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
-    body.append(f'<p class="mut">보너스 합계 {total:.2f} (상한 0.50).</p>')
-    body.append('<h2>스타터 코스</h2><p class="lead">튜토리얼을 마치면 플레이 결과에 맞춰 세 코스 중 하나를 추천합니다. '
-                '단계마다 비슷한 레벨의 곡 세 개가 있고, A 이상으로 클리어하면 다음 단계로 넘어갑니다. 레이팅 보너스는 없습니다.</p>')
-    band_desc = {"Struggled": "레슨을 여러 번 다시 했거나 마지막 구간에서 많이 맞았을 때", "Steady": "무난히 마쳤을 때",
-                 "Strong": "여유 있게 마쳤을 때"}
+                    f'<p class="small mut">{t("stepup.avg", v=f"{sum(ints) / len(ints):.2f}")}{" · " + t("stepup.pack") if pack else ""}</p>'
+                    f'<div class="tw"><table><thead><tr><th class="n">#</th><th>{t("col.song")}</th><th>{t("col.city")}</th><th>{t("col.tier")}</th><th class="n">Lv</th>'
+                    f'<th class="n">{t("col.internal")}</th><th>{t("col.need")}</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+    body.append(f'<p class="mut">{t("stepup.total", v=f"{total:.2f}")}</p>')
+    body.append(f'<h2>{t("stepup.starters")}</h2><p class="lead">{t("stepup.starters_lead")}</p>')
     for s in starters:
-        body.append(f'<h3 id="starter-{s["band"].lower()}">{e(s["title"])} <span class="mut small">· {band_desc.get(s["band"], "")}</span></h3>'
-                    '<div class="tw"><table><thead><tr><th class="n">단계</th><th>난이도</th><th>곡</th></tr></thead><tbody>')
+        body.append(f'<h3 id="starter-{s["band"].lower()}">{e(s["title"])} <span class="mut small">· {t("starter." + s["band"])}</span></h3>'
+                    f'<div class="tw"><table><thead><tr><th class="n">{t("col.step")}</th><th>{t("col.tier")}</th><th>{t("col.songs")}</th></tr></thead><tbody>')
         for i, st in enumerate(s["steps"]):
             k = rule_key[st["rule"]]
             links = " · ".join(f'<a href="songs/{sid}.html">{e(by_id[sid]["title"])}</a> '
                                f'<span class="dim small mono">{by_id[sid]["tiers"][k]["internal"]:.2f}</span>' for sid in st["songs"])
-            body.append(f'<tr><td class="n">{i + 1}</td><td><span class="chip" style="color:{TIER_COLOR[k]}">{st["rule"]}</span></td><td>{links}</td></tr>')
+            body.append(f'<tr><td class="n">{i + 1}</td><td>{tier_chip(k, st["rule"])}</td><td>{links}</td></tr>')
         body.append("</tbody></table></div>")
-    return page(False, "stepup.html", "STEP UP", "BeatBound STEP UP 인증 코스 8개와 스타터 코스 구성.", "".join(body))
+    return page("stepup.html", "stepup.html", t("stepup.title"), t("stepup.desc"), "".join(body))
 
 
 def rules_page():
-    body = ['<p class="eyebrow">Score &amp; Rank</p><h1>점수·랭크 규칙</h1>',
-            '<p class="lead">8×8 패드 판 위에서 큐브를 움직여 음악에 맞춰 터지는 폭발을 피하는 게임입니다. '
-            '점수는 피한 폭발, 아슬아슬하게 피한 COOL, 마지막 순간에 빠져나간 JUST로 쌓입니다.</p>',
-            '<h2>100만점 배점</h2><p>곡마다 단위 u를 정해 배점합니다. 100만점은 “피격 0, COOL 최대, JUST 0”인 최적 플레이입니다.</p>',
-            '<div class="tw"><table><thead><tr><th>항목</th><th class="n">점수</th><th>설명</th></tr></thead><tbody>'
-            '<tr><td>폭발 피함</td><td class="n">3u</td><td>16분 틱마다 한 번</td></tr>'
-            '<tr><td>COOL (근접)</td><td class="n">u</td><td>폭발 바로 옆에서 피함. FEVER 안에서는 2u</td></tr>'
-            '<tr><td>JUST</td><td class="n">u</td><td>터지기 0–150ms 전에 폭발 범위 밖으로 빠져나감. FEVER 안 2u, 100만점 위로 넘침</td></tr>'
-            '<tr><td>BONUS</td><td class="n">20u</td><td>30콤보마다</td></tr>'
-            '<tr><td>피격</td><td class="n">−10u</td><td>맞으면 감점, 연속 피격은 HP를 깎음</td></tr></tbody></table></div>',
-            '<div class="formula">u = 50 × 1,000,000 ÷ 기준 원점수   (5의 배수로 올림)\n'
-            '기준 원점수 = 150 × 폭발 수 + 1000 × ⌊폭발 수 ÷ 30⌋ + 50 × (최대 COOL + FEVER 안 최대 COOL)</div>',
-            '<p class="small mut">최대 COOL은 채보 전체를 미리 아는 봇이 계산한 정확한 최적값입니다(50ms 격자, 입력 간격 150ms 이상, 한 칸씩 이동). '
-            '곡별 값은 각 곡 페이지의 “점수 배점” 표에 있습니다.</p>',
-            '<h2>랭크 컷</h2><p>모든 곡이 같은 컷을 씁니다. 랭크는 점수만 봅니다.</p>'
-            '<div class="tw"><table><thead><tr><th>랭크</th><th class="n">기본</th><th class="n">+</th><th class="n">++</th></tr></thead><tbody>']
+    rows = [(t("rules.r_dodge"), "3u", t("rules.r_dodge_d")), (t("rules.r_cool"), "u", t("rules.r_cool_d")),
+            ("JUST", "u", t("rules.r_just_d")), ("BONUS", "20u", t("rules.r_bonus_d")), (t("rules.r_hit"), "−10u", t("rules.r_hit_d"))]
+    body = [f'<p class="eyebrow">Score &amp; Rank</p><h1>{t("rules.title")}</h1><p class="lead">{t("rules.lead")}</p>',
+            f'<h2>{t("rules.million")}</h2><p>{t("rules.million_text")}</p>',
+            f'<div class="tw"><table><thead><tr><th>{t("col.item")}</th><th class="n">{t("col.points")}</th><th>{t("col.what")}</th></tr></thead><tbody>'
+            + "".join(f'<tr><td>{a}</td><td class="n">{b}</td><td>{c}</td></tr>' for a, b, c in rows) + "</tbody></table></div>",
+            f'<div class="formula">{e(t("rules.formula"))}</div><p class="small mut">{t("rules.formula_note")}</p>',
+            f'<h2>{t("rules.cuts")}</h2><p>{t("rules.cuts_text")}</p>'
+            f'<div class="tw"><table><thead><tr><th>{t("col.rankname")}</th><th class="n">{t("col.base")}</th><th class="n">+</th><th class="n">++</th></tr></thead><tbody>']
+    d = dict(CUTS)
     for g in ["SSS", "SS", "S", "A", "B", "C", "D"]:
-        d = dict(CUTS)
         body.append(f'<tr><td><b>{g}</b></td><td class="n">{d[g]:,}</td><td class="n">{d[g + "+"]:,}</td><td class="n">{d[g + "++"]:,}</td></tr>')
-    body.append('</tbody></table></div><p class="small mut">실패한 판은 F. 100만을 넘는 점수도 그대로 기록됩니다.</p>')
-    body.append('<h2>난이도와 규칙</h2><div class="tw"><table><thead><tr><th>난이도</th><th>예고 시간</th><th>피격 허용</th><th>열리는 조건</th></tr></thead><tbody>'
-                f'<tr><td><span class="chip" style="color:{TIER_COLOR["easy"]}">EASY</span></td><td>약 1.3초</td><td>폭발 수의 4.2%</td><td>항상</td></tr>'
-                f'<tr><td><span class="chip" style="color:{TIER_COLOR["normal"]}">NORMAL</span></td><td>약 1.3초</td><td>3%</td><td>항상</td></tr>'
-                f'<tr><td><span class="chip" style="color:{TIER_COLOR["hard"]}">HARD</span></td><td>약 1.0초</td><td>3%</td><td>그 곡 NORMAL 이상 클리어, 또는 아무 곡 10곡 클리어</td></tr>'
-                f'<tr><td><span class="chip" style="color:{TIER_COLOR["extreme"]}">EXTREME</span></td><td>곡 기본 (8분 4칸 또는 2칸)</td><td>3%</td><td>그 곡 HARD를 S 이상, 또는 레이팅 EMERALD</td></tr>'
-                f'<tr><td><span class="chip" style="color:#ff4dc7">PERFECT</span></td><td>EXTREME과 같음</td><td>1회</td><td>그 곡 EXTREME 클리어</td></tr>'
-                '</tbody></table></div>'
-                '<p class="small mut">예고 시간은 목표 초에 가장 가까운 박 단위 길이로 맞추고, 곡 기본 예고보다 짧아지지는 않습니다. '
-                '피격 허용은 연속으로 맞을 수 있는 횟수이고, 피하는 동안 조금씩 회복됩니다.</p>')
-    body.append('<h2>FEVER</h2><p>곡마다 가장 뜨거운 구간 하나가 FEVER입니다. 그 안에서는 COOL·JUST가 두 배입니다. '
-                '곡별 FEVER 구간은 각 곡 페이지에 있습니다.</p>')
-    return page(False, "rules.html", "점수·랭크 규칙", "BeatBound 100만점 배점, 랭크 컷, 난이도별 규칙.", "".join(body))
+    body.append(f'</tbody></table></div><p class="small mut">{t("rules.cuts_note")}</p>')
+    body.append(f'<h2>{t("rules.tiers")}</h2><div class="tw"><table><thead><tr><th>{t("col.tier")}</th><th>{t("col.warning")}</th>'
+                f'<th>{t("col.hitbudget")}</th><th>{t("col.unlock")}</th></tr></thead><tbody>')
+    for key, color in [("easy", None), ("normal", None), ("hard", None), ("extreme", None), ("perfect", "#ff4dc7")]:
+        cells = t("rules.t_" + key).split("|")
+        chip = tier_chip(key) if not color else f'<span class="chip" style="color:{color}">PERFECT</span>'
+        body.append(f'<tr><td>{chip}</td>' + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
+    body.append(f'</tbody></table></div><p class="small mut">{t("rules.tiers_note")}</p>')
+    body.append(f'<h2>{t("rules.fever")}</h2><p>{t("rules.fever_text")}</p>')
+    return page("rules.html", "rules.html", t("rules.title"), t("rules.desc"), "".join(body))
 
 
 # ---------------------------------------------------------------- main
+def write_data(songs):
+    d = OUT / "data"
+    d.mkdir(parents=True, exist_ok=True)
+    keep = set()
+    for s in songs:
+        x = s["tiers"]["extreme"]
+        demo_end = x["bar_starts"][min(16, len(x["bar_starts"]) - 1)]
+        data = dict(id=s["id"], bpm=s["bpm"], demoEnd=demo_end,
+                    tiers={k: dict(lead=round(s["tiers"][k]["lead_sec"] * 1000), hits=s["tiers"][k]["enc"]) for k, *_ in TIERS})
+        (d / f"{s['id']}.json").write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
+        keep.add(f"{s['id']}.json")
+    for old in d.glob("*.json"):
+        if old.name not in keep:
+            old.unlink()
+
+
 def main():
-    global VERSION, BUILD_DATE, EVALUATOR, NEIGHBOURS
+    global VERSION, BUILD_DATE, EVALUATOR, NEIGHBOURS, LANG
     import datetime
     BUILD_DATE = datetime.date.today().isoformat()
-    VERSION = BUILD_DATE.replace("-", "")
+    VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
     EVALUATOR = re.search(r"evaluatorVersion: (\S+)", (GD / "ChartLevelTable.asset").read_text(encoding="utf-8")).group(1)
     cities = load_cities()
     levels = load_levels()
@@ -789,20 +918,25 @@ def main():
             for sid in st["songs"]:
                 starters_by_song[sid].append((s, i, st))
 
-    (OUT / "songs").mkdir(parents=True, exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "wiki.css").write_text(CSS.strip() + "\n", encoding="utf-8")
-    (OUT / "index.html").write_text(index_page(songs, cities), encoding="utf-8")
-    (OUT / "rating.html").write_text(rating_page(songs, cities), encoding="utf-8")
-    (OUT / "stepup.html").write_text(stepup_page(songs, cities, courses, starters), encoding="utf-8")
-    (OUT / "rules.html").write_text(rules_page(), encoding="utf-8")
-    keep = set()
-    for s in songs:
-        (OUT / "songs" / f"{s['id']}.html").write_text(song_page(s, cities, ranks, courses_by_song, starters_by_song), encoding="utf-8")
-        keep.add(f"{s['id']}.html")
-    for old in (OUT / "songs").glob("*.html"):
-        if old.name not in keep:
-            old.unlink()
-    print(f"wrote {len(songs)} songs, {len(courses)} courses, {len(starters)} starter courses → {OUT}")
+    (OUT / "wiki.js").write_text(JS.strip() + "\n", encoding="utf-8")
+    write_data(songs)
+    for LANG in LANGS:
+        out = OUT if LANG == "ko" else OUT / "en"
+        (out / "songs").mkdir(parents=True, exist_ok=True)
+        (out / "index.html").write_text(index_page(songs, cities), encoding="utf-8")
+        (out / "rating.html").write_text(rating_page(songs, cities), encoding="utf-8")
+        (out / "stepup.html").write_text(stepup_page(songs, cities, courses, starters), encoding="utf-8")
+        (out / "rules.html").write_text(rules_page(), encoding="utf-8")
+        keep = set()
+        for s in songs:
+            (out / "songs" / f"{s['id']}.html").write_text(song_page(s, cities, ranks, courses_by_song, starters_by_song), encoding="utf-8")
+            keep.add(f"{s['id']}.html")
+        for old in (out / "songs").glob("*.html"):
+            if old.name not in keep:
+                old.unlink()
+    print(f"wrote {len(songs)} songs × {len(LANGS)} languages, {len(courses)} courses, {len(starters)} starter courses → {OUT}")
 
 
 if __name__ == "__main__":
