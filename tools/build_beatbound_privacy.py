@@ -45,20 +45,21 @@ TEXT["en"] = dict(
     lang_label="Language",
     body=f"""
 <p>MeMe Games ("we", "us") makes BeatBound, a rhythm game for PC, Mac, iPhone, iPad and Android. This policy explains what information we process when you play the game and when you visit this website, why we process it, and the choices you have.</p>
-<p class="small">Effective date: October 26, 2026 · Controller: MeMe Games · Contact: {MAIL}</p>
+<p class="small">Effective date: November 13, 2026 · Controller: MeMe Games · Contact: {MAIL}</p>
 
 <h2>1. Information we process and why</h2>
 {table(["Feature", "Information", "Purpose"], [
-    ["Offline play", "Nickname, settings, play records, ranks, unlocked items. Stored only on your device.", "Save your progress and settings"],
+    ["Offline play", "Settings, play records, ranks, unlocked items, and your nickname until you go online. Stored only on your device.", "Save your progress and settings"],
     ["Online sign-in", "An anonymous device-based identifier and Product User ID created by Epic Online Services, your device model", "Identify players for ranked play, ghosts and versus matches, without an account or password"],
     ["Ranked play and score checks", "Song, difficulty, mode, score, hits, progress, the timing of your inputs, your position on the board during the song, ladder points, rating, win and loss records", "Verify scores against cheating, rank players, match you with opponents and other players' recorded runs (ghosts)"],
-    ["Live versus matches", "Product User ID, a generated name (such as PLAYER-1A2B), ladder points, rating, equipped character and in-match play data, network information needed to connect (such as IP address)", "Connect you with an opponent and keep the match in sync"],
+    ["Nickname and public ranking", "Your nickname, linked to your Product User ID, and your verified rating, rank and best score per chart", "Keep nicknames unique, show rankings, and let anyone look up a player's rating on our website"],
+    ["Live versus matches", "Product User ID, your nickname, ladder points, rating, equipped character and in-match play data, network information needed to connect (such as IP address)", "Connect you with an opponent and keep the match in sync"],
     ["Ads (mobile only)", "Advertising identifier (if you allow it), IP address, device and app information, ad views and clicks", "Show ads, measure them and prevent ad fraud"],
     ["Remove-ads purchase (mobile only)", "Purchase status and order information from the App Store or Google Play", "Turn off ads and restore your purchase on reinstall"],
     ["Server security", "IP address, request time, requested address, app version information in web requests", "Prevent abuse, limit request rates, troubleshoot"],
     ["Inquiries", "Your email address and anything you include in your message", "Answer your inquiry"],
 ])}
-<p>Your nickname stays on your device. It is not sent to our server or shown to other players.</p>
+<p>Your nickname is stored on your device. When you first use online features, the game registers it on our server as your unique online name; if someone already uses it, the game asks you to pick another. Your nickname then appears with your rating, rank and best score per chart in the public ranking and player lookup on our website (memegames.dev/beatbound/wiki), and to other players in versus rooms. Ghosts still use a random name.</p>
 
 <h2>2. Online sign-in</h2>
 <p>Online features start only when you first open ranked or versus play. The game then signs in to Epic Online Services (EOS) with a device-based identifier. You do not create an account, and we never ask for an email address, password or real name. The game passes a sign-in token from EOS to our server (api.memegames.dev), which checks it with Epic and recognizes you by your Product User ID.</p>
@@ -78,7 +79,7 @@ TEXT["en"] = dict(
 <ul>
 <li>Your position-by-time recording of a song for one day, unless it becomes a ghost or belongs to a match still in progress.</li>
 <li>Input timing of runs that fail the score check for seven days.</li>
-<li>Scores, verified input timing, ghosts, ladder and rating records for as long as the online service runs, or until you ask us to delete them. Ghosts are replaced as newer runs come in.</li>
+<li>Scores, verified input timing, ghosts, ladder and rating records and your registered nickname for as long as the online service runs, or until you delete your online data or ask us to delete it. Ghosts are replaced as newer runs come in.</li>
 <li>Backup copies of the server database for up to 30 days.</li>
 <li>Web request logs only as long as needed for security and troubleshooting.</li>
 </ul>
@@ -94,7 +95,7 @@ TEXT["en"] = dict(
 <li><strong>Apple Inc. and Google LLC</strong>: app stores, in-app purchases and payments</li>
 <li><strong>GitHub, Inc.</strong>: hosting this website</li>
 </ul>
-<p>Other players see your runs as ghosts with a random generated name and character, a short code derived from your Product User ID, and your ladder points. Leaderboards show only that short code. In a live versus match your opponent receives your Product User ID, generated name, ladder points, rating, equipped character and in-match play. Depending on how players are connected, technical information such as your IP address may be visible to the relay service or to your opponent.</p>
+<p>Other players see your runs as ghosts with a random generated name and character, a short code derived from your Product User ID, and your ladder points. Rankings show your nickname (or that short code if you have not registered one), your rating and your best score per chart. In a live versus match your opponent receives your Product User ID, nickname, ladder points, rating, equipped character and in-match play. Depending on how players are connected, technical information such as your IP address may be visible to the relay service or to your opponent.</p>
 <p>We do not sell your personal information. Apart from the ad services described in section 3, we do not share it for advertising.</p>
 {links([("epic", "Epic Games Privacy Policy"), ("unity", "Unity Privacy Policy"), ("levelplay", "Unity Game Player and App User Privacy Policy (LevelPlay, Unity Ads)"), ("apple", "Apple Privacy Policy"), ("google", "Google Privacy Policy"), ("oracle", "Oracle Privacy Policy"), ("cloudflare", "Cloudflare Privacy Policy"), ("github", "GitHub Privacy Statement")])}
 
@@ -159,20 +160,21 @@ TEXT["ko"] = dict(
     lang_label="언어",
     body=f"""
 <p>미미게임즈(MeMe Games, 이하 "회사")는 PC, Mac, iPhone, iPad, Android용 리듬 게임 BeatBound를 만듭니다. 이 방침은 게임을 플레이하거나 이 웹사이트를 방문할 때 회사가 어떤 정보를 왜 처리하는지, 그리고 이용자가 무엇을 선택할 수 있는지 설명합니다.</p>
-<p class="small">시행일: 2026년 10월 26일 · 개인정보처리자: 미미게임즈 · 문의: {MAIL}</p>
+<p class="small">시행일: 2026년 11월 13일 · 개인정보처리자: 미미게임즈 · 문의: {MAIL}</p>
 
 <h2>1. 처리하는 정보와 목적</h2>
 {table(["기능", "정보", "목적"], [
-    ["오프라인 플레이", "닉네임, 설정, 플레이 기록, 랭크, 해금 아이템. 기기에만 저장합니다.", "진행 상황과 설정 저장"],
+    ["오프라인 플레이", "설정, 플레이 기록, 랭크, 해금 아이템, 온라인 전의 닉네임. 기기에만 저장합니다.", "진행 상황과 설정 저장"],
     ["온라인 로그인", "Epic Online Services가 만드는 익명 기기 기반 식별자와 Product User ID, 기기 모델명", "계정이나 비밀번호 없이 랭크전·고스트·대전에서 플레이어 식별"],
     ["랭크전과 점수 검증", "곡, 난이도, 모드, 점수, 피격 수, 진행률, 입력 타이밍, 곡 진행 중 보드 위 위치, 래더 포인트, 레이팅, 승패 기록", "부정행위 방지를 위한 점수 검증, 순위 산정, 상대 및 다른 플레이어의 녹화 기록(고스트) 매칭"],
-    ["실시간 대전", "Product User ID, 자동 생성 이름(예: PLAYER-1A2B), 래더 포인트, 레이팅, 장착 캐릭터, 대전 중 플레이 데이터, 연결에 필요한 네트워크 정보(IP 주소 등)", "상대와 연결하고 대전 동기화"],
+    ["닉네임과 공개 랭킹", "Product User ID에 연결된 닉네임, 검증된 레이팅·순위·채보별 최고 점수", "닉네임 중복 방지, 랭킹 표시, 웹사이트에서 플레이어 레이팅 조회"],
+    ["실시간 대전", "Product User ID, 닉네임, 래더 포인트, 레이팅, 장착 캐릭터, 대전 중 플레이 데이터, 연결에 필요한 네트워크 정보(IP 주소 등)", "상대와 연결하고 대전 동기화"],
     ["광고(모바일만)", "광고 식별자(허용한 경우), IP 주소, 기기·앱 정보, 광고 노출·클릭", "광고 표시, 광고 성과 측정, 광고 사기 방지"],
     ["광고 제거 구매(모바일만)", "App Store·Google Play의 구매 상태와 주문 정보", "광고 끄기, 재설치 시 구매 복원"],
     ["서버 보안", "웹 요청의 IP 주소, 요청 시각, 요청 주소, 앱 버전 정보", "남용 방지, 요청 수 제한, 장애 대응"],
     ["문의", "이메일 주소와 메시지에 적은 내용", "문의 답변"],
 ])}
-<p>닉네임은 기기에만 남습니다. 회사 서버로 보내거나 다른 플레이어에게 보여 주지 않습니다.</p>
+<p>닉네임은 기기에 저장됩니다. 온라인 기능을 처음 쓸 때 게임이 닉네임을 회사 서버에 고유한 온라인 이름으로 등록하며, 이미 다른 사람이 쓰는 이름이면 다른 이름을 정하도록 안내합니다. 등록한 닉네임은 레이팅, 순위, 채보별 최고 점수와 함께 웹사이트(memegames.dev/beatbound/wiki)의 공개 랭킹과 플레이어 조회에 표시되고, 대전방에서 다른 플레이어에게 보입니다. 고스트에는 지금처럼 무작위 이름을 씁니다.</p>
 
 <h2>2. 온라인 로그인</h2>
 <p>온라인 기능은 랭크전이나 대전을 처음 열 때 시작됩니다. 이때 게임이 기기 기반 식별자로 Epic Online Services(EOS)에 로그인합니다. 계정을 만들지 않으며, 이메일 주소·비밀번호·실명을 묻지 않습니다. 게임은 EOS가 발급한 로그인 토큰을 회사 서버(api.memegames.dev)에 전달하고, 서버는 Epic을 통해 토큰을 확인한 뒤 Product User ID로 이용자를 구분합니다.</p>
@@ -192,7 +194,7 @@ TEXT["ko"] = dict(
 <ul>
 <li>곡 진행 중 위치 기록: 1일. 단, 고스트로 쓰이거나 진행 중인 매치에 속한 경우는 예외입니다.</li>
 <li>점수 검증에 실패한 판의 입력 타이밍: 7일</li>
-<li>점수, 검증된 입력 타이밍, 고스트, 래더·레이팅 기록: 온라인 서비스를 운영하는 동안 또는 삭제를 요청할 때까지. 고스트는 새 기록이 들어오면 교체됩니다.</li>
+<li>점수, 검증된 입력 타이밍, 고스트, 래더·레이팅 기록, 등록한 닉네임: 온라인 서비스를 운영하는 동안 또는 온라인 데이터를 삭제하거나 삭제를 요청할 때까지. 고스트는 새 기록이 들어오면 교체됩니다.</li>
 <li>서버 데이터베이스 백업: 최대 30일</li>
 <li>웹 요청 로그: 보안과 장애 대응에 필요한 기간만</li>
 </ul>
@@ -208,7 +210,7 @@ TEXT["ko"] = dict(
 <li><strong>Apple Inc., Google LLC</strong>: 앱 스토어, 인앱 결제</li>
 <li><strong>GitHub, Inc.</strong>: 이 웹사이트 호스팅</li>
 </ul>
-<p>다른 플레이어에게는 내 기록이 고스트로 보이며, 무작위로 만든 이름·캐릭터, Product User ID에서 만든 짧은 코드, 래더 포인트가 함께 표시됩니다. 순위표에는 그 짧은 코드만 표시됩니다. 실시간 대전에서는 상대가 내 Product User ID, 자동 생성 이름, 래더 포인트, 레이팅, 장착 캐릭터, 대전 중 플레이를 받습니다. 연결 방식에 따라 IP 주소 같은 기술 정보가 중계 서비스나 상대에게 보일 수 있습니다.</p>
+<p>다른 플레이어에게는 내 기록이 고스트로 보이며, 무작위로 만든 이름·캐릭터, Product User ID에서 만든 짧은 코드, 래더 포인트가 함께 표시됩니다. 랭킹에는 닉네임(등록하지 않았다면 그 짧은 코드), 레이팅, 채보별 최고 점수가 표시됩니다. 실시간 대전에서는 상대가 내 Product User ID, 닉네임, 래더 포인트, 레이팅, 장착 캐릭터, 대전 중 플레이를 받습니다. 연결 방식에 따라 IP 주소 같은 기술 정보가 중계 서비스나 상대에게 보일 수 있습니다.</p>
 <p>회사는 개인정보를 판매하지 않으며, 3항의 광고 서비스를 빼면 광고 목적으로 제공하지 않습니다.</p>
 {links([("epic", "Epic Games 개인정보처리방침"), ("unity", "Unity 개인정보처리방침"), ("levelplay", "Unity 게임 플레이어·앱 이용자 개인정보처리방침(LevelPlay, Unity Ads)"), ("apple", "Apple 개인정보처리방침"), ("google", "Google 개인정보처리방침"), ("oracle", "Oracle 개인정보처리방침"), ("cloudflare", "Cloudflare 개인정보처리방침"), ("github", "GitHub 개인정보 처리방침")])}
 
