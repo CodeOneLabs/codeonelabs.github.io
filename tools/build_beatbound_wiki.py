@@ -498,7 +498,7 @@ const ra=document.querySelector('.reveal-all');if(ra)ra.onclick=()=>document.que
 })();
 """
 
-NAV = [("index.html", "nav.songs"), ("rating.html", "nav.rating"), ("stepup.html", "nav.stepup"), ("rules.html", "nav.rules"), ("gear.html", "nav.gear")]
+NAV = [("index.html", "nav.songs"), ("rating.html", "nav.rating"), ("stepup.html", "nav.stepup"), ("rules.html", "nav.rules"), ("gear.html", "nav.gear"), ("ranking.html", "nav.ranking")]
 LOGO = "".join(f'<i class="{"on" if c == "1" else ""}" style="--d:{i}"></i>' for i, c in enumerate("101010101"))
 
 
@@ -819,29 +819,208 @@ def stepup_page(songs, cities, courses, starters):
     return page("stepup.html", "stepup.html", t("stepup.title"), t("stepup.desc"), "".join(body))
 
 
+# ---------------------------------------------------------------- art: tier badges, gear icons, rule diagrams
+BADGE_COLORS = ["#ff8034", "#c4e4ff", "#ffd630", "#5cffec", "#30ff88", "#5ca8ff", "#ff40c8"]
+BADGE_FACE, BADGE_IVORY = "#0e121e", "#ecf2ff"
+
+
+def _star(n, r0, r1, rot):
+    pts = []
+    for i in range(n * 2):
+        a = rot + i * math.pi / n
+        r = r1 if i % 2 else r0
+        pts.append(f"{50 + r * math.cos(a):.1f},{50 + r * math.sin(a):.1f}")
+    return f'<polygon points="{" ".join(pts)}"/>'
+
+
+def _badge_shape(fam):
+    return {0: '<circle cx="50" cy="50" r="40"/>',
+            1: '<path d="M50 8 L87 19 V50 Q87 79 50 93 Q13 79 13 50 V19 Z"/>',
+            2: _star(12, 43, 37, 0),
+            3: _star(3, 43, 43, -math.pi / 2),
+            4: '<polygon points="33,9 67,9 90,32 90,68 67,91 33,91 10,68 10,32"/>',
+            5: '<polygon points="50,5 94,50 50,95 6,50"/>'}.get(fam, _star(8, 47, 31, -math.pi / 2))
+
+
+def tier_badge(name, size=56, rim=False):
+    """Game rank badge (Design/RankBadge/v2/tier_badge_v3.html): C2 outline for big, C3 rim for small."""
+    idx = [n for n, _ in RATING_TIERS].index(name)
+    fam = 6 if name == "MASTER" else idx // 3
+    div = 0 if name == "MASTER" else idx % 3 + 1
+    c = BADGE_COLORS[fam]
+    sh = _badge_shape(fam)
+    label = "M" if fam == 6 else ["I", "II", "III"][div - 1]
+    shadow = f'<g transform="translate(0 5)" fill="#000" opacity=".6">{sh}</g>'
+    if rim:
+        fs = 30 if fam == 6 else 25 if div == 3 else 29
+        inner = f'<g fill="{c}">{sh}</g><g transform="translate(50 50) scale(.74) translate(-50 -50)" fill="{BADGE_FACE}">{sh}</g>'
+        text_fill = c
+    else:
+        fs = 34 if fam == 6 else 28 if div == 3 else 32
+        inner = (f'<g fill="{BADGE_FACE}" stroke="{c}" stroke-width="4" stroke-linejoin="round">{sh}</g>'
+                 f'<g transform="translate(50 50) scale(.8) translate(-50 -50)" fill="none" stroke="{c}" stroke-width="1.6" opacity=".45" stroke-linejoin="round">{sh}</g>')
+        text_fill = BADGE_IVORY
+    return (f'<svg class="badge" width="{size}" height="{size}" viewBox="0 0 100 105" aria-label="{name}" role="img">{shadow}{inner}'
+            f'<text x="50" y="{50 + fs * .36:.1f}" text-anchor="middle" font-family="ui-sans-serif,-apple-system,Arial Black,sans-serif" '
+            f'font-weight="900" font-size="{fs}" fill="{text_fill}">{label}</text></svg>')
+
+
+LAUNCHPAD_SKINS = {
+    "CLASSIC": ("linear-gradient(160deg,#1d1a2b,#0b0a12)", "#2f2a45"),
+    "IVORY": ("linear-gradient(160deg,#f4ecd8,#cfc3a6)", "#fffaf0"),
+    "CARBON": ("repeating-linear-gradient(45deg,#1b1b1f 0 4px,#26262c 4px 8px)", "#3a3a44"),
+    "WALNUT": ("linear-gradient(160deg,#7a4a2a,#3e2414),repeating-linear-gradient(100deg,#0000 0 6px,#00000022 6px 7px)", "#a06a40"),
+    "CHROME": ("linear-gradient(160deg,#f2f5fa,#8d97a8 45%,#e3e8f0 55%,#6f7889)", "#ffffff"),
+    "GOLD": ("linear-gradient(160deg,#ffe58a,#c8901e 45%,#ffd45c 55%,#9a6a10)", "#fff1b8"),
+}
+
+
+def gear_icon(g, color):
+    kind, name = g["kind"], g["name"]
+    if kind == "character":
+        return f'<canvas class="chr" data-char="{name}" width="128" height="128" style="--g:{color}" aria-label="{name}"></canvas>'
+    if kind == "launchpad":
+        body, rim = LAUNCHPAD_SKINS.get(name, LAUNCHPAD_SKINS["CLASSIC"])
+        pads = "".join("<i></i>" for _ in range(9))
+        return f'<span class="lp" style="--body:{body};--rim:{rim}"><span class="lp-dots"><i></i><i></i><i></i></span><span class="lp-pads">{pads}</span></span>'
+    return f'<span class="strip" style="background-image:url(img/gear/{kind}-{name.lower()}.png)" aria-label="{name}"></span>'
+
+
+def mini_board(cells, me=None, arrow=None, near=(), size=150, n=5, color="#ffe047"):
+    """Rule diagram: n×n board, blast cells lit, the player cube, optional move arrow."""
+    gap, pad = 4, 8
+    cell = (size - pad * 2 - gap * (n - 1)) / n
+    out = [f'<svg class="dia" viewBox="0 0 {size} {size}" width="{size}" height="{size}" role="img">',
+           f'<rect width="{size}" height="{size}" rx="14" fill="#100e18" stroke="#2f2a45"/>']
+
+    def xy(i):
+        return pad + (i % n) * (cell + gap), pad + (i // n) * (cell + gap)
+    for i in range(n * n):
+        x, y = xy(i)
+        lit = i in cells
+        fill = color if lit else ("#2a2440" if i in near else "#1d1a2b")
+        cls = ' class="boomcell"' if lit else ""
+        out.append(f'<rect{cls} x="{x:.1f}" y="{y:.1f}" width="{cell:.1f}" height="{cell:.1f}" rx="5" fill="{fill}"/>')
+        if i in near and not lit:
+            out.append(f'<rect x="{x + 2:.1f}" y="{y + 2:.1f}" width="{cell - 4:.1f}" height="{cell - 4:.1f}" rx="4" fill="none" stroke="#5cffec" stroke-width="1.5" stroke-dasharray="3 3"/>')
+    if arrow:
+        (ax, ay), (bx, by) = xy(arrow[0]), xy(arrow[1])
+        h = cell / 2
+        out.append(f'<line x1="{ax + h:.1f}" y1="{ay + h:.1f}" x2="{bx + h:.1f}" y2="{by + h:.1f}" stroke="#fff" stroke-width="3" stroke-dasharray="4 4" marker-end="url(#ar)"/>')
+        out.append('<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#fff"/></marker></defs>')
+    if me is not None:
+        x, y = xy(me)
+        k = cell * .18
+        out.append(f'<rect class="me" x="{x + k:.1f}" y="{y + k:.1f}" width="{cell - 2 * k:.1f}" height="{cell - 2 * k:.1f}" rx="5" fill="#00f0ff"/>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def score_bar():
+    """Rank cut ruler 0 … 1,000,000+ with the base cut of each rank."""
+    marks = [("D", 0, "#8a83a3"), ("C", 400000, "#9aa4b8"), ("B", 500000, "#7aadff"), ("A", 600000, "#3de680"),
+             ("S", 700000, "#ffc738"), ("SS", 800000, "#ff8a3d"), ("SSS", 900000, "#ff4dc7")]
+    lo = 350000
+    span = 1050000 - lo
+    segs = []
+    for i, (g, cut, col) in enumerate(marks):
+        start = max(cut, lo)
+        end = marks[i + 1][1] if i + 1 < len(marks) else 1050000
+        left = (start - lo) / span * 100
+        width = (end - start) / span * 100
+        segs.append(f'<div class="seg" style="left:{left:.2f}%;width:{width:.2f}%;--c:{col}"><b>{g}</b><span>{cut // 1000}k</span></div>')
+    plus = [(950000, "SSS+"), (980000, "SSS++"), (1000000, "1M")]
+    ticks = "".join(f'<i class="tick{" mil" if v == 1000000 else ""}" style="left:{(v - lo) / span * 100:.2f}%;--h:{8 + k * 13}px"><em>{lbl} <span>{v // 1000}k</span></em></i>'
+                    for k, (v, lbl) in enumerate(plus))
+    return f'<div class="ruler">{"".join(segs)}{ticks}</div>'
+
+
 def rules_page():
     rows = [(t("rules.r_dodge"), "3u", t("rules.r_dodge_d")), (t("rules.r_cool"), "u", t("rules.r_cool_d")),
             ("JUST", "u", t("rules.r_just_d")), ("BONUS", "20u", t("rules.r_bonus_d")), (t("rules.r_hit"), "−10u", t("rules.r_hit_d"))]
-    body = [f'<p class="eyebrow">Score &amp; Rank</p><h1>{t("rules.title")}</h1><p class="lead">{t("rules.lead")}</p>',
+    blast = {5, 6, 7, 8, 9}          # a horizontal line through row 1
+    figs = [
+        (mini_board(blast, me=17), L("피함", "Dodge"), "3u", L("폭발 칸 밖에 있으면 피한 것", "Stand outside the lit cells")),
+        (mini_board(blast, me=12, near={10, 11, 12, 13, 14}), "COOL", "+u", L("폭발 바로 옆 칸에서 피하면", "Dodge from a cell right next to the blast")),
+        (mini_board(blast, me=12, arrow=(7, 12)), "JUST", "+u", L("터지기 0–150ms 전에 빠져나가면", "Leave the blast 0–150 ms before it goes off")),
+        (mini_board(blast, me=7), L("피격", "Hit"), "−10u", L("터질 때 폭발 칸 안에 있으면", "Inside a lit cell when it goes off")),
+    ]
+    fig_html = '<div class="figs">' + "".join(
+        f'<figure class="fig{" bad" if i == 3 else ""}">{svg}<figcaption><b>{name}</b> <span class="mono">{pts}</span><br><span class="small mut">{cap}</span></figcaption></figure>'
+        for i, (svg, name, pts, cap) in enumerate(figs)) + "</div>"
+    body = [f'<p class="eyebrow">Score &amp; Rank</p><h1>{t("rules.title")}</h1><p class="lead">{t("rules.lead")}</p>', fig_html,
             f'<h2>{t("rules.million")}</h2><p>{t("rules.million_text")}</p>',
             f'<div class="tw"><table><thead><tr><th>{t("col.item")}</th><th class="n">{t("col.points")}</th><th>{t("col.what")}</th></tr></thead><tbody>'
             + "".join(f'<tr><td>{a}</td><td class="n">{b}</td><td>{c}</td></tr>' for a, b, c in rows) + "</tbody></table></div>",
             f'<div class="formula">{e(t("rules.formula"))}</div><p class="small mut">{t("rules.formula_note")}</p>',
-            f'<h2>{t("rules.cuts")}</h2><p>{t("rules.cuts_text")}</p>'
+            f'<h2>{t("rules.cuts")}</h2><p>{t("rules.cuts_text")}</p>', score_bar(),
             f'<div class="tw"><table><thead><tr><th>{t("col.rankname")}</th><th class="n">{t("col.base")}</th><th class="n">+</th><th class="n">++</th></tr></thead><tbody>']
     d = dict(CUTS)
     for g in ["SSS", "SS", "S", "A", "B", "C", "D"]:
         body.append(f'<tr><td><b>{g}</b></td><td class="n">{d[g]:,}</td><td class="n">{d[g + "+"]:,}</td><td class="n">{d[g + "++"]:,}</td></tr>')
     body.append(f'</tbody></table></div><p class="small mut">{t("rules.cuts_note")}</p>')
-    body.append(f'<h2>{t("rules.tiers")}</h2><div class="tw"><table><thead><tr><th>{t("col.tier")}</th><th>{t("col.warning")}</th>'
-                f'<th>{t("col.hitbudget")}</th><th>{t("col.unlock")}</th></tr></thead><tbody>')
-    for key, color in [("easy", None), ("normal", None), ("hard", None), ("extreme", None), ("perfect", "#ff4dc7")]:
+    # difficulty cards with warning-length bars
+    tiers = [("easy", None, 1.3), ("normal", None, 1.3), ("hard", None, 1.0), ("extreme", None, .65), ("perfect", "#ff4dc7", .65)]
+    body.append(f'<h2>{t("rules.tiers")}</h2><div class="tiercards">')
+    for key, color, lead in tiers:
         cells = t("rules.t_" + key).split("|")
-        chip = tier_chip(key) if not color else f'<span class="chip" style="color:{color}">PERFECT</span>'
-        body.append(f'<tr><td>{chip}</td>' + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
-    body.append(f'</tbody></table></div><p class="small mut">{t("rules.tiers_note")}</p>')
-    body.append(f'<h2>{t("rules.fever")}</h2><p>{t("rules.fever_text")}</p>')
+        col = color or TIER_COLOR[key]
+        body.append(f'<div class="tcard" style="--tc:{col}"><span class="chip" style="color:{col}">{key.upper()}</span>'
+                    f'<div class="leadbar"><i style="width:{lead / 1.3 * 100:.0f}%"></i></div>'
+                    f'<dl class="kv small"><dt>{t("col.warning")}</dt><dd>{cells[0]}</dd><dt>{t("col.hitbudget")}</dt><dd>{cells[1]}</dd>'
+                    f'<dt>{t("col.unlock")}</dt><dd>{cells[2]}</dd></dl></div>')
+    body.append(f'</div><p class="small mut">{t("rules.tiers_note")}</p>')
+    body.append(f'<h2>{t("rules.fever")}</h2><div class="fever"><div class="fv-line">'
+                + "".join(f'<i style="height:{h}%"></i>' for h in [20, 30, 25, 45, 40, 55, 50, 60, 70, 90, 95, 100, 92, 96, 100, 85, 50, 40, 35, 30, 45, 40, 30, 20])
+                + f'</div><div class="fv-band" style="left:37.5%;width:33.3%"><b>FEVER</b> COOL·JUST ×2</div></div><p>{t("rules.fever_text")}</p>')
     return page("rules.html", "rules.html", t("rules.title"), t("rules.desc"), "".join(body))
+
+
+ART_CSS = r"""
+.strip{display:block;width:56px;height:56px;border-radius:10px;background-size:800% 100%;background-repeat:no-repeat;animation:strip 1.6s steps(7,end) infinite}
+.gear:hover .strip{animation-duration:.8s}
+@keyframes strip{from{background-position:0 0}to{background-position:100% 0}}
+canvas.chr{width:56px;height:56px;display:block}
+.lp{display:flex;flex-direction:column;gap:3px;width:56px;height:56px;padding:5px;border-radius:9px;background:var(--body);border:1.5px solid var(--rim);box-shadow:inset 0 1px 0 #ffffff30,0 3px 0 #0006}
+.lp-dots{display:flex;gap:3px}.lp-dots i{width:5px;height:5px;border-radius:50%;background:var(--g);opacity:.8}
+.lp-pads{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:3px}.lp-pads i{border-radius:3px;background:#1d1a2bdd;box-shadow:inset 0 0 0 1px #ffffff12}
+.gear:hover .lp-pads i:nth-child(odd){background:var(--g);box-shadow:0 0 6px var(--g)}
+.badge{display:inline-block;vertical-align:middle;overflow:visible;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.tw-t:hover .badge,.badge:hover{transform:scale(1.12) rotate(-4deg)}
+.tw-t{flex-direction:row!important;align-items:center;gap:10px!important}.tw-t .tt{display:flex;flex-direction:column}
+.rt-row{display:flex;align-items:center;gap:10px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.fig{margin:0;background:var(--face);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.fig svg{max-width:100%;height:auto}.fig.bad .me{fill:#ff3b5c}.fig figcaption b{font-size:15px}
+.dia .boomcell{animation:boomc 1.8s ease-out infinite}.dia .me{animation:hopme 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes boomc{0%,55%{opacity:.25}60%{opacity:1}100%{opacity:.25}}
+@keyframes hopme{0%,50%,100%{transform:scale(1)}58%{transform:scale(1.15)}}
+.ruler{position:relative;height:58px;margin:18px 0 64px;border-radius:10px;background:var(--face);border:1px solid var(--line)}
+.ruler .seg{position:absolute;top:0;bottom:0;border-left:2px solid var(--c);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 28%,transparent),transparent);padding:6px 6px;display:flex;flex-direction:column}
+.ruler .seg b{color:var(--c);font:800 14px var(--mono)}.ruler .seg span{font:11px var(--mono);color:var(--muted)}
+.ruler .tick{position:absolute;top:100%;width:1px;height:var(--h);background:var(--muted)}.ruler .tick em{position:absolute;top:calc(var(--h) + 1px);left:0;transform:translateX(-90%);font:700 10.5px var(--mono);color:var(--muted);font-style:normal;white-space:nowrap}
+.ruler .tick em span{opacity:.7}.ruler .tick.mil{background:#fff}.ruler .tick.mil em{color:#fff}
+.tiercards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0}
+.tcard{background:var(--face);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s}.tcard:hover{border-color:var(--tc)}
+.leadbar{height:6px;border-radius:3px;background:#ffffff10;overflow:hidden}.leadbar i{display:block;height:100%;background:var(--tc);border-radius:3px}
+.fever{position:relative;background:var(--face);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.fv-line{display:flex;align-items:flex-end;gap:3px;height:70px}.fv-line i{flex:1;background:#5a5470;border-radius:2px 2px 0 0}
+.fv-line i:nth-child(n+10):nth-child(-n+17){background:#ffd34d;box-shadow:0 0 8px #ffd34d88}
+.fv-band{position:absolute;top:8px;font:700 11px var(--mono);color:#ffd34d;text-align:center}
+.rank-tbl td.badgecell{width:40px}.lookup{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.lookup input{font:15px var(--mono);color:var(--ink);background:var(--face2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:180px}
+.notice{border:1px dashed var(--line);border-radius:12px;padding:14px;color:var(--muted)}
+"""
+
+CHAR_JS = r"""<script src="characters.js?v=VER"></script><script>
+(()=>{if(!window.BBChars)return;const cs=[...document.querySelectorAll('canvas.chr')];const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const vis=new Set();const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target)));cs.forEach(c=>io.observe(c));
+const local=new Map();const t0=performance.now();
+function draw(c,t){const x=c.getContext('2d'),w=c.width;const col=getComputedStyle(c).getPropertyValue('--g').trim()||'#00f0ff';
+ const beatT=(t%(60/128))/(60/128);const hop=reduce?0:Math.max(0,1-beatT*4);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,w,w);
+ x.translate(w/2,w/2+hop*-6);const s=(w*.78)/128*(1+hop*.06);x.scale(s,s);if(!local.has(c))local.set(c,{});BBChars.draw(x,c.dataset.char,col,t,local.get(c))}
+function loop(now){const t=reduce?0.4:(now-t0)/1000;vis.forEach(c=>draw(c,t));if(!reduce)requestAnimationFrame(loop)}
+cs.forEach(c=>draw(c,0.4));requestAnimationFrame(loop)})();</script>"""
 
 
 # ---------------------------------------------------------------- collectibles (GEAR, plates, titles)
@@ -1001,9 +1180,9 @@ def gear_page(songs, cities, courses, gear, titles, song_words, loc):
                     f'<p class="mut small">{t("gear.kind." + kind + "_d")}</p><div class="gear-grid">')
         for g in items:
             secret = g["name"] == "NONE"
-            color = cities[by_id[g["song"]]["city"]]["color"] if g["song"] else ("#ffd34d" if g["course"] else "#8a83a3")
+            color = cities[by_id[g["song"]]["city"]]["color"] if g["song"] else ("#ffd34d" if g["course"] else "#00f0ff")
             body.append(f'<div class="gear{" secret" if secret else ""}" style="--g:{color}" tabindex="0">'
-                        f'<span class="gi gi-{kind}"></span><b>{e(g["name"])}</b>'
+                        f'{gear_icon(g, color)}<b>{e(g["name"])}</b>'
                         f'<span class="gc">{gear_condition(g, by_id, courses, "")}</span></div>')
         body.append("</div>")
         if kind == "frame":
@@ -1053,7 +1232,7 @@ def gear_page(songs, cities, courses, gear, titles, song_words, loc):
     body.append("</tbody></table></div>")
     words_table("plate", t("gear.t.plate"))
     words_table("hidden", t("gear.t.hidden"), t("gear.t.hidden_d"))
-    script = ""
+    script = CHAR_JS.replace("characters.js", ("../" if LANG == "en" else "") + "characters.js").replace("VER", VERSION)
     return page("gear.html", "gear.html", t("gear.title"), t("gear.desc"), "".join(body), script)
 
 
@@ -1083,7 +1262,7 @@ def rating_page(songs, cities, courses):
     data = dict(songs=[dict(id=s["id"], t=s["title"], c=cities[s["city"]]["color"],
                             lv={k: round(s["tiers"][k]["internal"], 3) for k, *_ in TIERS}) for s in songs],
                 courses=[dict(t=c["title"], b=c["bonus"]) for c in courses],
-                tiers=[dict(n=n, lo=lo, c=tier_color(n)) for n, lo in RATING_TIERS],
+                tiers=[dict(n=n, lo=lo, c=tier_color(n), b=tier_badge(n, 40)) for n, lo in RATING_TIERS],
                 tierColors={k: TIER_COLOR[k] for k, *_ in TIERS})
     weights = "".join(f'<i class="{"h" if i < 5 else "t"}" title="#{i + 1} · {"10%" if i < 5 else "3.3%"}"></i>' for i in range(20))
     ladder = "".join(f'<i style="--c:{tier_color(n)};flex:{(RATING_TIERS[i + 1][1] if i + 1 < len(RATING_TIERS) else 11) - lo}" title="{n} · {lo:.2f}+"></i>'
@@ -1100,8 +1279,10 @@ def rating_page(songs, cities, courses):
             f'<h2 id="calc">{t("rating.calc")}</h2><p class="mut small">{t("rating.calc_d")}</p>',
             '<div class="calc card"><div class="calc-out">'
             f'<div><span class="eyebrow">{t("rating.result")}</span><div class="big-rating" id="rv">0.00</div>'
-            '<span class="chip" id="rt">BRONZE I</span> <span class="small mut" id="rn"></span></div>'
+            '<div class="rt-row"><span id="rb"></span><span class="chip" id="rt">BRONZE I</span></div><span class="small mut" id="rn"></span></div>'
             f'<div class="ladder">{ladder}<b id="rm"></b></div><p class="small mono mut" id="req"></p></div>'
+            f'<span class="eyebrow">{t("rating.lookup")}</span><div class="lookup"><input id="lk" maxlength="8" placeholder="NICKNAME" aria-label="{t("rating.lookup")}">'
+            f'<button class="btn" id="lkb">{t("rating.lookup_btn")}</button><span class="small mut" id="lkm"></span></div>'
             f'<div class="calc-rows"><table><thead><tr><th class="n">{t("rating.slot")}</th><th>{t("rating.song")}</th><th>{t("col.tier")}</th>'
             f'<th class="n">{t("rating.score")}</th><th class="n">{t("rating.value")}</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>'
             f'<p style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="add">{t("rating.add")}</button>'
@@ -1112,7 +1293,7 @@ def rating_page(songs, cities, courses):
     body.append(f'<h2>{t("rating.tiers")}</h2><div class="tierwall">')
     for i, (n, lo) in enumerate(RATING_TIERS):
         rng = f"{lo:.2f} ~ {RATING_TIERS[i + 1][1] - .01:.2f}" if i + 1 < len(RATING_TIERS) else f"{lo:.2f} +"
-        body.append(f'<div class="tw-t" style="--c:{tier_color(n)}"><b>{n}</b><span class="mono">{rng}</span></div>')
+        body.append(f'<div class="tw-t" style="--c:{tier_color(n)}">{tier_badge(n, 46)}<span class="tt"><b>{n}</b><span class="mono">{rng}</span></span></div>')
     body.append(f'</div><p class="small mut">{t("rating.tiers_note")}</p>')
     ladder_rows = "".join(f'<tr><td>{t("ladder.r" + str(i))}</td><td class="n">{b}</td></tr>' for i, b in enumerate(["0.5", "0.4", "0.3", "0.2", "0.1"], 1))
     body.append(f'<h2>{t("rating.bonus")}</h2><div class="grid g2"><div class="card"><h3 style="margin-top:0">{t("rating.bonus_stepup")}</h3>'
@@ -1129,7 +1310,8 @@ def rating_page(songs, cities, courses):
                     f'<td>{tier_chip(k)}</td><td class="n">{v:.3f}</td><td class="n">{s["tiers"][k]["level"]}</td></tr>')
     body.append('</tbody></table></div>')
     script = ("<script>window.RD=" + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";window.RL="
-              + json.dumps(dict(next=t("rating.next", tier="{tier}", n="{n}")), ensure_ascii=False) + ";</script>" + CALC_JS)
+              + json.dumps(dict(next=t("rating.next", tier="{tier}", n="{n}"), ok=t("rating.lookup_ok", name="{name}", n="{n}"), none=t("rating.lookup_none")), ensure_ascii=False)
+              + ";</script>" + CALC_JS + LOOKUP_JS.replace("'API'", "'" + API_BASE + "'"))
     return page("rating.html", "rating.html", t("rating.title"), t("rating.desc"), "".join(body), script)
 
 
@@ -1153,7 +1335,7 @@ function render(){st.rows.sort((a,b)=>val(b)-val(a));tb.innerHTML='';const vals=
  const bonus=Math.min(.5,st.courses.reduce((a,i)=>a+D.courses[i].b,0))+st.ladder;const total=head+tail+bonus;
  const rv=document.getElementById('rv');const old=parseFloat(rv.textContent)||0;const target=total;const t0=performance.now();
  const tok=(rv._tok=(rv._tok||0)+1);(function anim(now){if(rv._tok!==tok)return;const k=Math.min(1,(now-t0)/450);const x=old+(target-old)*(1-Math.pow(1-k,3));rv.textContent=trunc(k<1?x:target);if(k<1)requestAnimationFrame(anim)})(t0);setTimeout(()=>{if(rv._tok===tok)rv.textContent=trunc(target)},520);
- const tr=tierOf(total);const chip=document.getElementById('rt');chip.textContent=tr.n;chip.style.color=tr.c;rv.style.color=tr.c;
+ const tr=tierOf(total);const chip=document.getElementById('rt');chip.textContent=tr.n;chip.style.color=tr.c;rv.style.color=tr.c;document.getElementById('rb').innerHTML=tr.b;
  const nx=D.tiers.find(k=>k.lo>total);document.getElementById('rn').textContent=nx?window.RL.next.replace('{tier}',nx.n).replace('{n}',(nx.lo-total).toFixed(2)):'';
  document.getElementById('rm').style.left=Math.min(100,total/11*100)+'%';
  document.getElementById('req').textContent=head.toFixed(3)+' + '+tail.toFixed(3)+' + '+bonus.toFixed(2)+' = '+total.toFixed(3);}
@@ -1165,7 +1347,8 @@ function build(){const ck=document.getElementById('cks');ck.innerHTML='';D.cours
   b.onclick=()=>{const j=st.courses.indexOf(i);j<0?st.courses.push(i):st.courses.splice(j,1);b.classList.toggle('on');save();render()};ck.appendChild(b)});
  const ld=document.getElementById('lad');ld.innerHTML='';[0,.1,.2,.3,.4,.5].forEach(v=>{const b=document.createElement('button');b.className='pill'+(st.ladder===v?' on':'');b.textContent=v.toFixed(1);
   b.onclick=()=>{st.ladder=v;ld.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));save();render()};ld.appendChild(b)})}
-if(!st.rows.length){document.getElementById('sample').click()}else{build();render()}
+window.BBCalc={load(rows,ladder){st.rows=rows;st.ladder=ladder;save();build();render()}};
+if(new URLSearchParams(location.search).get('name')){build();render()}else if(!st.rows.length){document.getElementById('sample').click()}else{build();render()}
 })();</script>"""
 
 COLLECT_CSS = r"""
@@ -1210,6 +1393,79 @@ ul.rewards{list-style:none;padding:0;display:grid;gap:6px;grid-template-columns:
 .tw-t:hover{transform:translateY(-2px);box-shadow:0 0 18px color-mix(in srgb,var(--c) 40%,transparent)}.tw-t b{color:var(--c);font:800 13px var(--mono);letter-spacing:.04em}.tw-t span{font-size:12.5px;color:var(--muted)}
 @media(max-width:640px){.calc-out{grid-template-columns:1fr}.big-rating{font-size:44px}.op{display:none}}
 """
+
+
+# ---------------------------------------------------------------- ranking (live, from api.memegames.dev)
+API_BASE = "https://api.memegames.dev"
+
+
+def ranking_page(songs, cities):
+    tiers = [dict(n=n, lo=lo, c=tier_color(n), b=tier_badge(n, 34, rim=True)) for n, lo in RATING_TIERS]
+    body = [f'<p class="eyebrow">Ranking</p><h1>{t("ranking.title")}</h1><p class="lead">{t("ranking.lead")}</p>',
+            f'<p class="small mut">{t("ranking.note")}</p>',
+            f'<div class="lookup"><input id="rq" type="search" maxlength="8" placeholder="{t("ranking.search")}" aria-label="{t("ranking.search")}"></div>',
+            f'<div class="tw"><table class="rank-tbl"><thead><tr><th class="n">#</th><th></th><th>{t("col.player")}</th>'
+            f'<th class="n">{t("col.total")}</th><th class="n">{t("col.charts")}</th></tr></thead><tbody id="rk"><tr><td colspan="5" class="mut">{t("ranking.loading")}</td></tr></tbody></table></div>',
+            f'<p><button class="btn ghost" id="more" hidden>{t("ranking.more")}</button></p>']
+    labels = dict(offline=t("ranking.offline"), empty=t("ranking.empty"))
+    script = ("<script>window.RK=" + json.dumps(dict(api=API_BASE, tiers=tiers, l=labels), ensure_ascii=False, separators=(",", ":")) + ";</script>" + r"""<script>
+(()=>{const R=window.RK,qs=new URLSearchParams(location.search),api=(qs.get('api')||R.api).replace(/\/$/,'');const tb=document.getElementById('rk'),more=document.getElementById('more'),q=document.getElementById('rq');
+let rows=[],offset=0;const PAGE=100;
+function tierOf(x){let t=R.tiers[0];for(const k of R.tiers)if(x>=k.lo)t=k;return t}
+function trunc(x){return (Math.floor(x*100+1e-4)/100).toFixed(2)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){const f=q.value.trim().toLowerCase();const list=rows.filter(r=>!f||r.name.toLowerCase().includes(f));
+ if(!list.length){tb.innerHTML='<tr><td colspan="5" class="mut">'+R.l.empty+'</td></tr>';return}
+ tb.innerHTML=list.map(r=>{const t=tierOf(r.total);const named=!/^[0-9a-f]{8}$/.test(r.name);
+  return '<tr><td class="n">'+r.rank+'</td><td class="badgecell">'+t.b+'</td><td>'+(named?'<a href="rating.html?name='+encodeURIComponent(r.name)+'#calc"><b>'+esc(r.name)+'</b></a>':'<span class="dim mono">'+esc(r.name)+'</span>')+
+  ' <span class="small" style="color:'+t.c+'">'+t.n+'</span></td><td class="n" style="color:'+t.c+'">'+trunc(r.total)+'</td><td class="n dim">'+trunc(r.chartRating)+'</td></tr>'}).join('')}
+async function load(){try{const r=await fetch(api+'/v1/public/ranking?offset='+offset+'&limit='+PAGE);if(!r.ok)throw 0;const page=await r.json();rows=rows.concat(page);offset+=page.length;more.hidden=page.length<PAGE;render()}
+ catch(e){if(!rows.length)tb.innerHTML='<tr><td colspan="5"><div class="notice">'+R.l.offline+'</div></td></tr>'}}
+q.oninput=render;more.onclick=load;load()})();</script>""")
+    return page("ranking.html", "ranking.html", t("ranking.title"), t("ranking.desc"), "".join(body), script)
+
+
+LOOKUP_JS = r"""<script>
+(()=>{const api=(new URLSearchParams(location.search).get('api')||'API').replace(/\/$/,'');const box=document.getElementById('lk'),btn=document.getElementById('lkb'),msg=document.getElementById('lkm');
+const TIER={4:'easy',0:'normal',3:'hard',2:'extreme'};
+async function go(name){name=(name||'').trim();if(!name)return;msg.textContent='…';
+ try{const r=await fetch(api+'/v1/public/player?name='+encodeURIComponent(name));if(!r.ok)throw 0;const p=await r.json();
+  const rows=p.charts.filter(c=>TIER[c.tier]&&window.RD.songs.some(s=>s.id===c.song)).slice(0,20).map(c=>({id:c.song,tier:TIER[c.tier],score:c.score}));
+  window.BBCalc.load(rows,Math.round((p.ladderBonus||0)*10)/10);msg.textContent=window.RL.ok.replace('{name}',p.name).replace('{n}',rows.length);
+  history.replaceState(null,'','?name='+encodeURIComponent(p.name)+'#calc')}
+ catch(e){msg.textContent=window.RL.none}}
+btn.onclick=()=>go(box.value);box.onkeydown=e=>{if(e.key==='Enter')go(box.value)};
+const n=new URLSearchParams(location.search).get('name');if(n){box.value=n;go(n)}})();</script>"""
+
+
+def write_characters_js():
+    """Extracts the character drawing code from the game's character review sheet into wiki/characters.js."""
+    src_path = BB / "Design" / "character_proposals.html"
+    if not src_path.exists():
+        return
+    src = src_path.read_text(encoding="utf-8")
+    body = src[src.index("  const BPM = 128, SPB = 60 / BPM;"):src.index("  // ---------- 카드 하나")]
+    body = body.replace("  let color = THEMES[5][1];\n  let realSize = false, paused = false;\n", "")
+    body = body.replace("const n = (m.beat % 4) + 1;", "const n = (((m.beat % 4) + 4) % 4) + 1;")   # the sheet crashes on negative beats
+    js = ("// BeatBound GEAR characters, drawn like the game's character review sheet (Design/character_proposals.html).\n"
+          "(() => {\n" + body + """
+  const EQ = { id: "EQ", draw(c, col, m) {
+    frame(c, col, 12); c.fillStyle = col;
+    const lv = [m.low, m.mid, m.high];
+    [-30, 0, 30].forEach((x, i) => capsule(c, x, 40, 18, 22 + 54 * lv[i]));
+  } };
+  const byId = Object.fromEntries([EQ, ...CHARS].map((ch) => [ch.id, ch]));
+  window.BBChars = {
+    ids: Object.keys(byId),
+    draw(c, id, col, t, local) {
+      const ch = byId[id]; if (!ch) return;
+      const mu = music(t);
+      ch.draw(c, col, { ...mu, t, dt: 1 / 60, kick: mu.low, local: local || {} });
+    },
+  };
+})();
+""")
+    (OUT / "characters.js").write_text(js, encoding="utf-8")
 
 
 # ---------------------------------------------------------------- main
@@ -1259,9 +1515,10 @@ def main():
                 starters_by_song[sid].append((s, i, st))
 
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "wiki.css").write_text((CSS + COLLECT_CSS).strip() + "\n", encoding="utf-8")
+    (OUT / "wiki.css").write_text((CSS + COLLECT_CSS + ART_CSS).strip() + "\n", encoding="utf-8")
     (OUT / "wiki.js").write_text(JS.strip() + "\n", encoding="utf-8")
     write_data(songs)
+    write_characters_js()
     for LANG in LANGS:
         out = OUT if LANG == "ko" else OUT / "en"
         (out / "songs").mkdir(parents=True, exist_ok=True)
@@ -1270,6 +1527,7 @@ def main():
         (out / "gear.html").write_text(gear_page(songs, cities, courses, GEAR, titles, SONG_WORDS, loc), encoding="utf-8")
         (out / "stepup.html").write_text(stepup_page(songs, cities, courses, starters), encoding="utf-8")
         (out / "rules.html").write_text(rules_page(), encoding="utf-8")
+        (out / "ranking.html").write_text(ranking_page(songs, cities), encoding="utf-8")
         keep = set()
         for s in songs:
             (out / "songs" / f"{s['id']}.html").write_text(song_page(s, cities, ranks, courses_by_song, starters_by_song), encoding="utf-8")

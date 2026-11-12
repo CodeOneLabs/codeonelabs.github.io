@@ -313,3 +313,26 @@ TEXT.update({
     "rating.next": {"ko": "{tier}까지 {n}", "en": "{n} to {tier}"},
     "rating.rules": {"ko": "자세한 규칙", "en": "The details"},
 })
+
+TEXT.update({
+    "nav.ranking": {"ko": "랭킹", "en": "Ranking"},
+    "ranking.title": {"ko": "레이팅 랭킹", "en": "Rating ranking"},
+    "ranking.desc": {"ko": "BeatBound 온라인 레이팅 순위.", "en": "BeatBound online rating ranking."},
+    "ranking.lead": {"ko": "서버가 검증한 기록으로 계산한 레이팅 순위예요. 이름은 게임에서 정한 닉네임이고 닉네임을 누르면 그 사람의 채보별 기록이 계산기에 채워집니다.",
+                     "en": "Ratings computed from runs the server has verified. Names are in-game nicknames; tap one to load that player's charts into the calculator."},
+    "ranking.note": {"ko": "STEP UP 보너스는 아직 서버가 검증하지 않아 빠져 있어요. 그래서 게임 안 숫자보다 조금 낮을 수 있습니다.",
+                     "en": "STEP UP bonuses are not verified by the server yet, so these totals can sit a little below the in-game number."},
+    "ranking.search": {"ko": "닉네임 찾기", "en": "Find a nickname"},
+    "ranking.loading": {"ko": "불러오는 중…", "en": "Loading…"},
+    "ranking.offline": {"ko": "랭킹 서버에 연결하지 못했어요. 잠시 뒤 다시 열어 주세요.", "en": "Could not reach the ranking server. Try again in a moment."},
+    "ranking.empty": {"ko": "아직 순위에 오른 사람이 없어요.", "en": "Nobody is ranked yet."},
+    "ranking.more": {"ko": "더 보기", "en": "Show more"},
+    "col.player": {"ko": "플레이어", "en": "Player"},
+    "col.total": {"ko": "레이팅", "en": "Rating"},
+    "col.charts": {"ko": "채보 몫", "en": "From charts"},
+    "rating.lookup": {"ko": "닉네임으로 불러오기", "en": "Load by nickname"},
+    "rating.lookup_btn": {"ko": "불러오기", "en": "Load"},
+    "rating.lookup_none": {"ko": "그 닉네임의 기록을 찾지 못했어요.", "en": "No records found for that nickname."},
+    "rating.lookup_ok": {"ko": "{name}의 기록 {n}개를 불러왔어요. 점수를 바꿔 보면서 얼마나 오를지 확인해 보세요.",
+                         "en": "Loaded {n} charts for {name}. Change any score to see how much the rating would move."},
+})
