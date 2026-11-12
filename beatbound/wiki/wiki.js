@@ -57,5 +57,7 @@ class Board{
   if(t>this.endMs){if(this.mode==='demo'){this.start(0)}else{this.stop()}}}
 }
 document.querySelectorAll('.bb').forEach(r=>new Board(r));
+document.querySelectorAll('.secret,.secret-line').forEach(el=>{const open=()=>el.classList.add('shown');el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter')open()})});
+const ra=document.querySelector('.reveal-all');if(ra)ra.onclick=()=>document.querySelectorAll('.secret,.secret-line').forEach(el=>el.classList.add('shown'));
 // small LED marks: twinkle the header logo, city filter glow is CSS
 })();
