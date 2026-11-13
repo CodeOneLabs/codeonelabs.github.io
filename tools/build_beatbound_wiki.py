@@ -437,7 +437,9 @@ JS = r"""
 const L=window.BBL||{};const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let ac=null,soundOn=true;
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume();return ac}
-function blip(f,d,type,vol){if(!soundOn)return;const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,a.currentTime);
+// live: a tap (user gesture) may wake a suspended context; board playback only sounds while the context runs,
+// otherwise blips queue on a frozen clock and all fire at once when the tab comes back.
+function blip(f,d,type,vol,live){if(!soundOn||document.hidden)return;const a=audio();if(!a||(!live&&a.state!=='running'))return;const o=a.createOscillator(),g=a.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,a.currentTime);
 o.frequency.exponentialRampToValueAtTime(Math.max(40,f*.45),a.currentTime+d);g.gain.setValueAtTime(vol||.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d)}
 function cellsOf(hex){const out=[];let v=BigInt('0x'+hex);for(let i=0;v>0n;i++,v>>=1n)if(v&1n)out.push(i);return out}
 const AIM={1:(x,y)=>[[x,y]],2:(x,y)=>[...Array(8)].map((_,i)=>[i,y]),3:(x,y)=>[...Array(8)].map((_,i)=>[x,i]),
@@ -456,7 +458,7 @@ class Board{
  }
  led(on){this.pads.forEach(p=>p.querySelector('.l').style.opacity=on?'':'0')}
  flash(cells,cls,ms){cells.forEach(i=>{const p=this.pads[i];if(!p)return;p.classList.add(cls);clearTimeout(p._t);p._t=setTimeout(()=>p.classList.remove(cls),ms||70)})}
- ripple(i){const x=i&7,y=i>>3;const cross=[];for(let k=0;k<8;k++){cross.push(y*8+k,k*8+x)}this.flash(cross,'boom',90);blip(520+x*40,.12,'square',.04);
+ ripple(i){const x=i&7,y=i>>3;const cross=[];for(let k=0;k<8;k++){cross.push(y*8+k,k*8+x)}this.flash(cross,'boom',90);blip(520+x*40,.12,'square',.04,true);
   for(let r=1;r<9;r++)setTimeout(()=>{const ring=[];for(let j=0;j<64;j++){const d=Math.max(Math.abs((j&7)-x),Math.abs((j>>3)-y));if(d===r)ring.push(j)}this.flash(ring,'ring',80)},r*45)}
  tap(i){audio();this.ripple(i)}
  async load(){if(this.data)return this.data;const r=await fetch(this.root.dataset.src);this.data=await r.json();
@@ -474,7 +476,9 @@ class Board{
   this.resolved=new Map();this.nHit=0;this.nDodge=0;this.playing=true;if(this.mode!=='demo'){this.mode='play';this.px=3;this.py=4}
   this.endMs=this.mode==='demo'?this.data.demoEnd:(this.hits.length?this.hits[this.hits.length-1][0]+900:0);
   this.led(false);this.t0=performance.now()-(this.fromMs-this.lead-300);const pb=this.ui&&this.ui.querySelector('.play');if(pb)pb.textContent=L.stop||'STOP';this.root.classList.add('on');
-  const loop=()=>{if(!this.playing)return;this.frame(performance.now()-this.t0);this.raf=requestAnimationFrame(loop)};loop()}
+  this.last=performance.now();
+  // a long frame gap (hidden tab, occluded window) pauses the chart instead of replaying everything it missed
+  const loop=()=>{if(!this.playing)return;const now=performance.now();if(now-this.last>250)this.t0+=now-this.last-16;this.last=now;this.frame(now-this.t0);this.raf=requestAnimationFrame(loop)};loop()}
  stop(quiet){this.playing=false;cancelAnimationFrame(this.raf);this.pads.forEach(p=>{p.classList.remove('warn','hot');p.style.removeProperty('--w')});
   if(!quiet)this.led(true);
   const pb=this.ui&&this.ui.querySelector('.play');if(pb)pb.textContent=L.play||'PLAY';this.root.classList.remove('on')}
@@ -483,12 +487,12 @@ class Board{
   if(hole){const hx=Math.min(8-hole,Math.max(0,this.px-((h[4]||0)<0?hole-1:0))),hy=Math.min(8-hole,Math.max(0,this.py-((h[5]||0)<0?hole-1:0)));
    c=[];for(let j=0;j<64;j++){const x=j&7,y=j>>3;if(!(x>=hx&&x<hx+hole&&y>=hy&&y<hy+hole))c.push(j)}}
   this.resolved.set(h,c);return c}
- frame(t){const w=new Float32Array(64);
+ frame(t){const w=new Float32Array(64);let due=0;
   for(let k=this.i;k<this.hits.length;k++){const h=this.hits[k];if(h[0]>t+this.lead)break;
-   if(h[0]<=t){if(k===this.i){const cells=this.resolve(h);this.flash(cells,'boom',70);
-     blip(300+cells.length*6,.06,'square',this.mode==='demo'?.02:.03);this.i++}continue}
+   if(h[0]<=t){if(k===this.i){const cells=this.resolve(h);this.flash(cells,'boom',70);due=Math.max(due,cells.length);this.i++}continue}
    const p=1-(h[0]-t)/this.lead;this.resolve(h).forEach(c=>{if(p>w[c])w[c]=p})}
   for(let c=0;c<64;c++){const p=this.pads[c];if(w[c]>0){p.classList.add('warn');p.classList.toggle('hot',w[c]>.8);p.style.setProperty('--w',w[c].toFixed(3))}else if(p.classList.contains('warn')){p.classList.remove('warn','hot')}}
+  if(due)blip(300+due*6,.06,'square',this.mode==='demo'?.02:.03);
   if(t>this.endMs){if(this.mode==='demo'){this.start(0)}else{this.stop()}}}
 }
 document.querySelectorAll('.bb').forEach(r=>new Board(r));
